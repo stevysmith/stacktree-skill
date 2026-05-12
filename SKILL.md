@@ -24,6 +24,17 @@ STACKTREE_API_URL=https://api.stacktr.ee   # optional override
 
 If `STACKTREE_API_KEY` isn't set, ask the user to set it before retrying.
 
+## Privacy-first defaults
+
+Every publish via this skill applies tighter defaults than the raw API:
+
+- **Unlisted URL** (`stacktr.ee/p/<22-char-token>/`) — not enumerable
+- **7-day expiry** — the artifact auto-deletes unless you pass `--expires-never`
+- **PII scan in block mode** — emails, SSNs, credit cards, API key prefixes (`sk-`, `xoxb-`, `ghp_`, AWS `AKIA`) reject the publish; pass `--pii-check warn` to override
+- **Strict CSP** + **`X-Robots-Tag: noai, noimageai`** on every served page
+
+If the user explicitly asks for permanence, longer reach, or relaxed PII, surface the override flags rather than disabling the defaults silently.
+
 ## Steps
 
 1. Make sure the artifact is a complete HTML document (`<!doctype html>...</html>`). If you only have a body fragment or markdown, wrap it.
@@ -33,7 +44,7 @@ If `STACKTREE_API_KEY` isn't set, ask the user to set it before retrying.
    - `--burn-after-read`
    - `--agentation` — enables the on-page feedback toolbar
    - `--public-slug <slug>` — opt into `{slug}.stacktr.ee/`
-   - `--pii-check off|warn|block` — default `warn`
+   - `--pii-check off|warn|block` — defaults to `block` via this skill (warn at the API)
 3. The script prints a JSON object including `url`. Surface the URL inline in your reply, plus expiry and any PII warnings.
 
 ## Examples

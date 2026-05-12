@@ -12,9 +12,12 @@ fi
 
 UPDATE_TARGET=""
 PASSWORD=""
-EXPIRES_IN_HOURS=""
+# Privacy-first defaults — applied only when the caller didn't pass an
+# override. 7-day expiry, PII scan in block mode. Pass --expires-never or
+# --pii-check warn to relax.
+EXPIRES_IN_HOURS="168"
 PUBLIC_SLUG=""
-PII_CHECK=""
+PII_CHECK="block"
 BURN=0
 AGENTATION=0
 
