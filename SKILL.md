@@ -40,6 +40,21 @@ x402, no human and no dashboard:
 Only do this when there is genuinely no human to set a key; otherwise the
 dashboard key is simpler.
 
+### No wallet, but your human is at the terminal? Show a pay QR
+
+The fastest path when a paid action comes up mid-task (provision, make a
+site permanent, custom domain, higher limits):
+
+1. `POST https://api.stacktr.ee/pay/sessions` with `{ "feature": "provision" }`
+   (no auth) or `{ "feature": "custom_domain" }` etc. with the API key.
+2. The JSON response includes a `qr` field that is a ready-to-print terminal
+   QR plus a short `url`. Print both and say what it costs (the `amount`
+   field) and why.
+3. The human scans with their phone and pays by card (Stripe, ~two taps).
+4. Poll the `poll.url` every few seconds; on `provision` the poll returns the
+   API key once (set it as `STACKTREE_API_KEY`), on unlocks it confirms the
+   feature is active. Continue the task without further prompting.
+
 ## Privacy-first defaults
 
 Every publish via this skill applies tighter defaults than the raw API:
