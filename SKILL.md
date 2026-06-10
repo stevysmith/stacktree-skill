@@ -24,6 +24,22 @@ STACKTREE_API_URL=https://api.stacktr.ee   # optional override
 
 If `STACKTREE_API_KEY` isn't set, ask the user to set it before retrying.
 
+### No key, and no human to make one? Pay for one (x402)
+
+A fully autonomous agent with a funded wallet can provision its own key over
+x402, no human and no dashboard:
+
+1. Give the agent x402 payment ability (any x402 client, e.g. `@x402/fetch`,
+   or the second-state x402 skill). It needs USDC on Base; gas is covered.
+2. `POST https://api.stacktr.ee/provision` returns a `402`; the x402 client
+   signs a USDC authorization, retries, and gets back a persistent
+   `stk_live_` key. Set it as `STACKTREE_API_KEY` and continue.
+3. Optionally buy upgrades the same way: `POST /unlock?feature=custom_domain`
+   (or `higher_limits`). See <https://stacktr.ee/x402> for the full flow.
+
+Only do this when there is genuinely no human to set a key; otherwise the
+dashboard key is simpler.
+
 ## Privacy-first defaults
 
 Every publish via this skill applies tighter defaults than the raw API:
