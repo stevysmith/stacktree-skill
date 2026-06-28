@@ -24,21 +24,27 @@ STACKTREE_API_URL=https://api.stacktr.ee   # optional override
 
 If `STACKTREE_API_KEY` isn't set, ask the user to set it before retrying.
 
-### No key, and no human to make one? Pay for one (x402)
+### No key, and no human to make one? Pay (x402 or MPP)
 
-A fully autonomous agent with a funded wallet can provision its own key over
-x402, no human and no dashboard:
+A fully autonomous agent with a funded wallet can pay for hosting directly, no
+human and no dashboard. Two paths:
 
-1. Give the agent x402 payment ability (any x402 client, e.g. `@x402/fetch`,
-   or the second-state x402 skill). It needs USDC on Base; gas is covered.
-2. `POST https://api.stacktr.ee/provision` returns a `402`; the x402 client
-   signs a USDC authorization, retries, and gets back a persistent
-   `stk_live_` key. Set it as `STACKTREE_API_KEY` and continue.
-3. Optionally buy upgrades the same way: `POST /unlock?feature=custom_domain`
-   (or `higher_limits`). See <https://stacktr.ee/x402> for the full flow.
+**Simplest: pay per publish at the front-door (no key).** POST the HTML to
+`https://agents.stacktr.ee/api/publish`, get a `402`, pay $0.50 over x402 (USDC
+on Base or Solana) or MPP (USDC.e on Tempo), and the page publishes to a private
+link returned in the response. Nothing to provision; gas is covered, the agent
+only signs. The wallet that paid is recorded with the page, so a human can later
+claim it from the dashboard, or the agent can self-link it with the
+`link_wallet` MCP tool.
 
-Only do this when there is genuinely no human to set a key; otherwise the
-dashboard key is simpler.
+**Repeat use: provision a persistent key.** `POST https://api.stacktr.ee/provision`
+returns a `402`; pay $1 over x402 or MPP and get back a persistent `stk_live_`
+key. Set it as `STACKTREE_API_KEY` and continue. Buy upgrades the same way:
+`POST /unlock?feature=custom_domain` (or `higher_limits`). See
+<https://stacktr.ee/x402> and <https://stacktr.ee/mpp> for the full flow.
+
+Provision a key when the agent will publish repeatedly; for a one-off, the
+front-door is simpler. When there is a human, the dashboard key is simplest.
 
 ### No wallet, but your human is at the terminal? Show a pay QR
 
