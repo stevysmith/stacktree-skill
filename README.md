@@ -4,13 +4,44 @@ The official [Stacktree](https://stacktr.ee) skill for Claude Code, Cursor, Open
 
 When the user asks to "publish this", "share this page", or "drop this on stacktree", the agent pipes the HTML artifact to `stacktr.ee` and returns the private URL back into the conversation.
 
+## The library
+
+This repo ships the general publish skill at the root, plus four job-shaped skills
+under `skills/`. Each job skill maps 1:1 to a validated Stacktree onboarding template
+and encodes the judgment for that job (the right gate, the right lifecycle, the right
+URL), not just the API call. The agent picks the job skill that matches the user's
+intent and falls back to the general skill for anything else.
+
+| Skill | Path | Job |
+|---|---|---|
+| `stacktree-publish` | root `SKILL.md` | Publish any HTML artifact and get back a private URL. The general path. |
+| `stacktree-client-deliverable` | `skills/client-deliverable/` | Hand a report or proposal to a client at a private link. Gates to the recipient, never expires. |
+| `stacktree-agent-run-report` | `skills/agent-run-report/` | Publish what your agent just produced, shareable with anyone, refreshable in place. |
+| `stacktree-daily-brief` | `skills/daily-brief/` | A dated brief or digest at one stable link, refreshed in place each day (suits a scheduled loop). |
+| `stacktree-status-dashboard` | `skills/status-dashboard/` | A live status or health page at a public URL, refreshed in place. The one job that uses a public slug. |
+
+All five share the same `scripts/publish.sh` helper and the Stacktree MCP tools
+(`publish_html`, `update_site`, `set_password`, `set_expiry`, `set_email_gate`,
+`set_agentation`, `list_sites`). They differ in defaults and judgment: gating, expiry,
+public versus unlisted, and whether the page is refreshed in place. Each job skill
+mirrors the matching onboarding template in `apps/web/src/templates.ts`, so the
+published page lands in a shape the user already recognizes.
+
 ## Install
+
+Browse the library and pick what you want at the prompt:
 
 ```bash
 npx skills@latest add stevysmith/stacktree-skill
 ```
 
-This drops `SKILL.md` and `scripts/publish.sh` into your agent's skill directory (`~/.claude/skills/` for Claude Code, `~/.codex/skills/` for Codex, etc.).
+Or install one skill directly by its name:
+
+```bash
+npx skills@latest add stevysmith/stacktree-skill --skill stacktree-publish
+```
+
+The chosen skill (its `SKILL.md`, plus the shared `scripts/publish.sh`) lands in your agent's skill directory (`~/.claude/skills/` for Claude Code, `~/.codex/skills/` for Codex, etc.).
 
 ## Configure
 
