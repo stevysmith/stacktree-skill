@@ -1,6 +1,6 @@
 ---
 name: stacktree-agent-run-report
-description: Publish what your agent just produced as a private web page, shareable with anyone who has the link. Use right after a run produces a report, audit, analysis, or dashboard that reads better in a browser than dumped in the chat, and the user wants a link to send to colleagues with no account or workspace required. Produces a page in the Agent run report shape (KPI header, findings, recommended order), keeps it unlisted, and is built to be refreshed in place on re-run.
+description: Publish what your agent just produced as a private web page, shareable with anyone who has the link. Use right after a run produces a report, audit, analysis, or a dashboard the agent built on demand, the kind that reads better in a browser than dumped in the chat, and the user wants a link to send to colleagues with no account or workspace required. Fits the throwaway, on-demand dashboard pattern (gather the data, render the HTML, share a private link that expires on its own) as well as longer run reports. Produces a page in the Agent run report shape (KPI header, findings, recommended order), keeps it unlisted with a sensible default expiry, and is built to be refreshed in place on re-run.
 ---
 
 # stacktree-agent-run-report
@@ -18,6 +18,10 @@ scrolling a wall of text in the chat. This is the publish path for the
   and no access to the workspace the agent ran in.
 - The user says "publish what you just did", "give me a link to this", or "put this
   somewhere I can look at it".
+- The user is following the build-it-then-throw-it-away pattern: rather than maintain a
+  standing dashboard, the agent gathers the data and renders a single-use HTML view to
+  answer one question right now. This skill is the publish step, and the expiry is what
+  makes the page genuinely disposable.
 
 For a deliverable headed to a named external client, use
 `stacktree-client-deliverable` (it adds recipient gating). For a dated digest on a
@@ -67,7 +71,10 @@ for the pay-to-provision path.
 3. **Default to a sensible expiry; offer permanence.** Most run reports are snapshots
    ("findings as of this run"). The 7-day default expiry fits them. Pass
    `--expires-never` when the user signals it is a keeper (a baseline, a reference).
-   When unsure, keep the expiry and say how to make it permanent.
+   When unsure, keep the expiry and say how to make it permanent. For a throwaway
+   dashboard built to answer one question, the expiry is the feature, not a limit: it
+   lets a single-use page remove itself instead of piling up as a dead link, which is
+   the whole reason the user stopped maintaining a standing dashboard.
 
 4. **Build it to be refreshed in place.** Re-running the task should update the same
    URL, not mint a new one. Keep the returned `id`/slug and, on the next run, publish
