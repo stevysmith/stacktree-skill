@@ -101,7 +101,10 @@ pay-to-provision path when there is genuinely no human and no key.
      after. Prefer generating the password over asking the user to invent one.
 5. Optionally `set_agentation` (or `--agentation`) if the client should be able to
    leave inline feedback (useful for a draft-for-review; skip it for a final, signed
-   deliverable).
+   deliverable). If you enable it, own the loop: once the client has annotated, pull
+   their notes with `list_feedback`, apply the changes with `update_site` so the
+   revision lands at the link they already have, then `resolve_feedback` each item
+   with a short note so the client can see what changed and why.
 6. Reply with: the link, the gate type and how the client gets in (the allowed
    email/domain, or the password on its own line), the fact that it will not expire,
    and any PII warning that was surfaced.

@@ -83,7 +83,7 @@ If the user explicitly asks for permanence, longer reach, or relaxed PII, surfac
    - `--password <secret>` — basic-auth gate
    - `--expires-in-hours <n>` or `--expires-never`
    - `--burn-after-read`
-   - `--agentation` — enables the on-page feedback toolbar
+   - `--agentation` — enables the on-page feedback toolbar; viewer annotations are collected in Stacktree, so read them back with the `list_feedback` MCP tool (or `GET /sites/:id/feedback`) and mark them addressed with `resolve_feedback`
    - `--public-slug <slug>` — opt into `{slug}.stacktr.ee/`
    - `--pii-check off|warn|block` — defaults to `block` via this skill (warn at the API)
 3. The script prints a JSON object including `url`. Surface the URL inline in your reply, plus expiry and any PII warnings.

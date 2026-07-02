@@ -6,7 +6,7 @@ When the user asks to "publish this", "share this page", or "drop this on stackt
 
 ## The library
 
-This repo ships the general publish skill at the root, plus four job-shaped skills
+This repo ships the general publish skill at the root, plus six job-shaped skills
 under `skills/`. Each job skill maps 1:1 to a validated Stacktree onboarding template
 and encodes the judgment for that job (the right gate, the right lifecycle, the right
 URL), not just the API call. The agent picks the job skill that matches the user's
@@ -19,10 +19,13 @@ intent and falls back to the general skill for anything else.
 | `stacktree-agent-run-report` | `skills/agent-run-report/` | Publish what your agent just produced, shareable with anyone, refreshable in place. |
 | `stacktree-daily-brief` | `skills/daily-brief/` | A dated brief or digest at one stable link, refreshed in place each day (suits a scheduled loop). |
 | `stacktree-status-dashboard` | `skills/status-dashboard/` | A live status or health page at a public URL, refreshed in place. The one job that uses a public slug. |
+| `stacktree-custom-domain` | `skills/custom-domain/` | Buy a real domain over x402 (stabledomains.dev) and serve a Stacktree page on it, end to end. |
+| `stacktree-sideshow-handoff` | `skills/sideshow-to-stacktree/` | Publish a finished Sideshow surface as a standalone private link for someone outside the terminal. |
 
-All five share the same `scripts/publish.sh` helper and the Stacktree MCP tools
-(`publish_html`, `update_site`, `set_password`, `set_expiry`, `set_email_gate`,
-`set_agentation`, `list_sites`). They differ in defaults and judgment: gating, expiry,
+All skills share the same `scripts/publish.sh` helper and the twelve Stacktree MCP
+tools (`publish_html`, `update_site`, `get_site`, `set_password`, `set_expiry`,
+`set_email_gate`, `set_agentation`, `list_sites`, `delete_site`, `link_wallet`,
+`list_feedback`, `resolve_feedback`). They differ in defaults and judgment: gating, expiry,
 public versus unlisted, and whether the page is refreshed in place. Each job skill
 mirrors the matching onboarding template in `apps/web/src/templates.ts`, so the
 published page lands in a shape the user already recognizes.
@@ -75,7 +78,7 @@ The skill exposes one shell script — `publish.sh` — that the agent invokes w
 | `--expires-in-hours <n>` | Set expiry in hours |
 | `--expires-never` | Disable expiry |
 | `--burn-after-read` | Delete on first view |
-| `--agentation` | Inject the on-page feedback toolbar |
+| `--agentation` | Inject the on-page feedback toolbar; feedback lands in Stacktree, readable via `list_feedback` |
 | `--public-slug <slug>` | Opt into a public `{slug}.stacktr.ee` URL |
 | `--update <id-or-slug>` | Replace an existing site in place |
 | `--pii-check off\|warn\|block` | PII scanner mode (default: `warn`) |
