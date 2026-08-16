@@ -15,102 +15,82 @@ Publish an HTML artifact to **stacktr.ee** and return the URL into the conversat
 
 Do **not** use this for code that isn't a complete static page (e.g. fragments, JSX components without a host page). Wrap the fragment in a minimal HTML shell first.
 
-## Required env
+## How to publish
 
-```
-STACKTREE_API_KEY=stk_live_...   # generate at https://app.stacktr.ee/api-keys
-STACKTREE_API_URL=https://api.stacktr.ee   # optional override
-```
+This skill is installed alongside the **stacktree MCP server** by `npx stacktree-install`. That means you already have stacktree tools available — call them directly, no shell scripts required.
 
-If `STACKTREE_API_KEY` isn't set, ask the user to set it before retrying.
+The tools you will use most:
 
-### No key, and no human to make one? Pay (x402 or MPP)
-
-A fully autonomous agent with a funded wallet can pay for hosting directly, no
-human and no dashboard. Two paths:
-
-**Simplest: pay per publish at the front-door (no key).** POST the HTML to
-`https://agents.stacktr.ee/api/publish`, get a `402`, pay $0.50 over x402 (USDC
-on Base or Solana) or MPP (USDC.e on Tempo), and the page publishes to a private
-link returned in the response. Nothing to provision; gas is covered, the agent
-only signs. The wallet that paid is recorded with the page, so a human can later
-claim it from the dashboard, or the agent can self-link it with the
-`link_wallet` MCP tool.
-
-**Repeat use: provision a persistent key.** `POST https://api.stacktr.ee/provision`
-returns a `402`; pay $1 over x402 or MPP and get back a persistent `stk_live_`
-key. Set it as `STACKTREE_API_KEY` and continue. Buy upgrades the same way:
-`POST /unlock?feature=custom_domain` (or `higher_limits`). See
-<https://stacktr.ee/x402> and <https://stacktr.ee/mpp> for the full flow.
-
-Provision a key when the agent will publish repeatedly; for a one-off, the
-front-door is simpler. When there is a human, the dashboard key is simplest.
-
-### No wallet, but your human is at the terminal? Show a pay QR
-
-The fastest path when a paid action comes up mid-task (provision, make a
-site permanent, custom domain, higher limits):
-
-1. `POST https://api.stacktr.ee/pay/sessions` with `{ "feature": "provision" }`
-   (no auth) or `{ "feature": "custom_domain" }` etc. with the API key.
-2. The JSON response includes a `qr` field that is a ready-to-print terminal
-   QR plus a short `url`. Print both and say what it costs (the `amount`
-   field) and why.
-3. The human scans with their phone and pays by card (Stripe, ~two taps).
-4. Poll the `poll.url` every few seconds; on `provision` the poll returns the
-   API key once (set it as `STACKTREE_API_KEY`), on unlocks it confirms the
-   feature is active. Continue the task without further prompting.
-5. Prefer one scan over many: pass `"amount_minor": 1000` on `provision` (or
-   use `{ "feature": "topup", "amount_minor": 1000 }` later). Anything above
-   the action's price becomes a prepaid balance, and future paid actions draw
-   from it silently — no more QRs until it runs out.
-
-## Privacy-first defaults
-
-Every publish via this skill applies tighter defaults than the raw API:
-
-- **Unlisted URL** (`stacktr.ee/p/<22-char-token>/`) — not enumerable
-- **7-day expiry** — the artifact auto-deletes unless you pass `--expires-never`
-- **PII scan in block mode** — emails, SSNs, credit cards, API key prefixes (`sk-`, `xoxb-`, `ghp_`, AWS `AKIA`) reject the publish; pass `--pii-check warn` to override
-- **Strict CSP** + **`X-Robots-Tag: noai, noimageai`** on every served page
-
-If the user explicitly asks for permanence, longer reach, or relaxed PII, surface the override flags rather than disabling the defaults silently.
+| Tool                 | Purpose                                                  |
+| -------------------- | -------------------------------------------------------- |
+| `publish_html`       | Upload HTML. Returns `{ url, id, expires_at, ... }`.     |
+| `update_site`        | Replace HTML in place — URL stays stable across revisions. |
+| `set_password`       | Add or clear a passcode gate. Paid plans only.           |
+| `set_email_gate`     | Restrict viewers to a specific email domain. Paid plans only. |
+| `set_expiry`         | Set hours-from-now expiry, or `null` for never.          |
+| `set_agentation`     | Toggle the on-page Agentation feedback toolbar.          |
+| `list_sites`         | List sites owned by this API key.                        |
+| `list_client_spaces` | List the client spaces pages are filed under.            |
+| `set_client`         | File an existing page under a client, or detach it.      |
+| `create_client_space` | Create a client space up front (publishing auto-creates one anyway). |
+| `update_client_space` | Rename, archive/unarchive, or gate a whole client space. |
+| `delete_client_space` | Delete a space; its pages detach and keep working.      |
+| `delete_site`        | Hard delete a site.                                      |
 
 ## Steps
 
-1. Make sure the artifact is a complete HTML document (`<!doctype html>...</html>`). If you only have a body fragment or markdown, wrap it.
-2. Run `scripts/publish.sh` (in this skill's directory) with the artifact piped on stdin. Pass options via flags:
-   - `--password <secret>` — basic-auth gate
-   - `--expires-in-hours <n>` or `--expires-never`
-   - `--burn-after-read`
-   - `--agentation` — enables the on-page feedback toolbar; viewer annotations are collected in Stacktree, so read them back with the `list_feedback` MCP tool (or `GET /sites/:id/feedback`) and mark them addressed with `resolve_feedback`
-   - `--public-slug <slug>` — opt into `{slug}.stacktr.ee/`
-   - `--pii-check off|warn|block` — defaults to `block` via this skill (warn at the API)
-3. The script prints a JSON object including `url`. Surface the URL inline in your reply, plus expiry and any PII warnings.
+1. Make sure the artifact is a complete HTML document (`<!doctype html>...</html>`). If you only have a body fragment or markdown, wrap it in a minimal HTML shell first.
+2. Call **`publish_html`** with the HTML content as the `content` argument. Optional arguments worth knowing:
+   - `password` — passcode gate, paid plans only
+   - `expires_in_hours` — number, or `'never'` (clamped to the plan ceiling)
+   - `agentation: true` — enables the on-page feedback toolbar
+   - `public_slug` — opt into `{slug}.stacktr.ee/` (otherwise unlisted)
+   - `pii_check: 'off' | 'warn' | 'block'` — default `block` from MCP
+   - `client` — file the page under a client space (see "Client spaces" below)
+3. The tool returns a JSON object including `url` and `expires_at`. Surface the URL inline in your reply, plus when the link expires and any PII warnings.
+4. If the user iterates on the same artifact later in the session, call **`update_site`** instead of `publish_html` — pass the previous `id` or `unlisted_token` so the URL stays stable across revisions.
 
 ## Examples
 
-Publish a quick artifact:
+User: "Publish this dashboard."
+→ Call `publish_html` with the HTML, reply with the returned URL inline.
 
-```bash
-echo "$ARTIFACT_HTML" | bash scripts/publish.sh
-# → { "url": "https://stacktr.ee/p/AbC.../", "expires_at": 1781234567, ... }
-```
+User: "Update the same one — gate it to @yourco.com."
+→ Call `update_site` with the existing slug and new HTML, then `set_email_gate` with the domain.
 
-Publish with password + 7-day expiry:
+User: "Make it expire in 24h."
+→ Call `set_expiry` with `expires_in_hours: 24`.
 
-```bash
-echo "$ARTIFACT_HTML" | bash scripts/publish.sh --password hunter2 --expires-in-hours 168
-```
+## Client spaces
 
-Replace an existing site (preserves the URL):
+When the user names a client, customer, or project the page is **for** ("publish this for Acme"), pass `client` on `publish_html` — the space is auto-created, no setup call needed. For a client that already exists, reuse the exact spelling from `list_client_spaces` so "Acme Co" and "acme" don't fork into two spaces. To file or detach a page that is already published, call `set_client` (`client: null` detaches). A page without a client is a normal floating page — don't invent a client the user didn't name.
 
-```bash
-echo "$ARTIFACT_HTML" | bash scripts/publish.sh --update <id-or-slug>
-```
+A space can carry its own **address** (`acme.theiragency.com`) and a generated **client portal** — an index of everything delivered, newest first, served at that address's root. Both are set up in the dashboard (DNS is involved). What matters to you: when a space has an address, the publish response includes `client_url` — the page's link on the client's own domain. **Prefer handing `client_url` to the user** over the stacktr.ee link; it's the address their client bookmarks. The portal rebuilds itself on every publish into the space, so filing a page is all it takes to appear there.
+
+Managing the spaces themselves is a separate, rarely needed set: `create_client_space` sets a client up before any work ships, `update_client_space` renames one, archives or unarchives it, and sets the `password` / `allowed_email_domain` gate that covers every page in the space, and `delete_client_space` removes it. When a client is simply finished, archive rather than delete: archiving keeps the pages, the portal and the address serving while freeing the plan slot, and it is reversible. Deleting never deletes pages either — they detach to floating pages on their existing URLs — but the portal and the address stop resolving.
+
+If `update_site` returns **409 `managed_portal`**, the page is that generated portal: it regenerates from its space, so direct edits would be overwritten. Don't retry — tell the user they can "customize" the portal from the space's settings in the dashboard, which stops regeneration and makes it an ordinary editable page.
 
 ## Privacy
 
-By default every URL is unlisted (`stacktr.ee/p/{22-char-token}/`) and not crawlable. Anonymous uploads expire in 24h. Authed (API-key) uploads default to never expire. Pass `--public-slug` only when the user wants a discoverable URL.
+Every URL is unlisted by default (`stacktr.ee/p/{22-char-token}/`) and not crawlable. Pass `public_slug` only when the user wants a discoverable URL.
 
-If the artifact contains values that look like API keys, emails, SSNs, or credit cards, the response includes `X-Stacktree-Pii-Warning`. Surface this to the user before sending the link to anyone.
+If the artifact contains values that look like API keys, emails, SSNs, or credit cards, the response surfaces a PII warning. Pass it through to the user before sharing the link.
+
+## Expiry and plan limits
+
+Expiry defaults are plan-aware: omitted on a paid plan means permanent; on the free plan every page caps at 7 days — `expires_in_hours: 'never'` is clamped down to the ceiling rather than refused. **Read `expires_at` off the response and tell the user when the link dies.** Do not tell them it is permanent just because you asked for permanent.
+
+The free plan allows 3 pages in total. The count is lifetime, so deleting a page does not free the slot. Past the third, `publish_html` returns HTTP 402 with `error: 'plan_lifetime_limit_exceeded'`; `set_password` and `set_email_gate` return `plan_password_not_available` and `plan_viewer_gate_not_available` on a free key. Report the limit plainly and stop. Do not retry, and do not work around it by republishing anonymously.
+
+Reaching for `update_site` on an existing page instead of publishing a new one is also the cheaper move: a replace keeps the URL and does not count as a new publish.
+
+## Making a page look better
+
+When the user asks to improve, polish, redesign, or "make beautiful" a published page, call `get_design_guide` FIRST and follow its workflow exactly. The short version: assess before restyling (a page that already has a deliberate design gets elevated in its own voice or left alone — never flattened to a house look), keep every fact/row/link intact, respect the CSP (no external fonts under strict CSP — use system stacks), then `update_site` in place so the shared link keeps working. Tell the user the direction you chose and that all content survived.
+
+## Fallback (no MCP server)
+
+If for some reason the stacktree MCP server isn't available in this session — you don't see `publish_html` in your tool list — the skill includes a shell-script fallback at `scripts/publish.sh`. It reads `STACKTREE_API_KEY` from the environment and POSTs to the public REST API. Use it only when MCP isn't an option; the MCP path is preferred.
+
+It takes HTML on stdin and accepts `--client` / `--client-path` (file the page under a client space, same as the `client` argument to `publish_html`), `--password`, `--expires-in-hours` / `--expires-never`, `--public-slug`, `--pii-check`, `--burn-after-read`, `--agentation`, and `--update <id>` to replace a page in place.

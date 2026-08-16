@@ -12,12 +12,11 @@ fi
 
 UPDATE_TARGET=""
 PASSWORD=""
-# Privacy-first defaults — applied only when the caller didn't pass an
-# override. 7-day expiry, PII scan in block mode. Pass --expires-never or
-# --pii-check warn to relax.
-EXPIRES_IN_HOURS="168"
+EXPIRES_IN_HOURS=""
 PUBLIC_SLUG=""
-PII_CHECK="block"
+PII_CHECK=""
+CLIENT=""
+CLIENT_PATH=""
 BURN=0
 AGENTATION=0
 
@@ -29,6 +28,8 @@ while [[ $# -gt 0 ]]; do
     --expires-never)      EXPIRES_IN_HOURS="never"; shift ;;
     --public-slug)        PUBLIC_SLUG="$2"; shift 2 ;;
     --pii-check)          PII_CHECK="$2"; shift 2 ;;
+    --client)             CLIENT="$2"; shift 2 ;;
+    --client-path)        CLIENT_PATH="$2"; shift 2 ;;
     --burn-after-read)    BURN=1; shift ;;
     --agentation)         AGENTATION=1; shift ;;
     *) echo "unknown flag: $1" >&2; exit 1 ;;
@@ -44,17 +45,47 @@ if [[ ! -s "$TMP" ]]; then
   exit 1
 fi
 
-ARGS=(-sS -H "Authorization: Bearer $API_KEY" -F "file=@$TMP;filename=index.html;type=text/html")
-[[ -n "$PASSWORD" ]]         && ARGS+=(-F "password=$PASSWORD")
-[[ -n "$EXPIRES_IN_HOURS" ]] && ARGS+=(-F "expires_in_hours=$EXPIRES_IN_HOURS")
-[[ -n "$PUBLIC_SLUG" ]]      && ARGS+=(-F "public_slug=$PUBLIC_SLUG")
-[[ -n "$PII_CHECK" ]]        && ARGS+=(-F "pii_check=$PII_CHECK")
-[[ "$BURN" -eq 1 ]]          && ARGS+=(-F "burn_after_read=true")
-[[ "$AGENTATION" -eq 1 ]]    && ARGS+=(-F "agentation=true")
+json_escape() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
 
 if [[ -n "$UPDATE_TARGET" ]]; then
-  curl -X PUT "${ARGS[@]}" "$API_URL/sites/$UPDATE_TARGET"
+  # PUT /sites/<id> swaps the file and reads no other form field, so the option
+  # flags are applied afterwards with PATCH rather than silently dropped.
+  UPDATE_ARGS=(-sS -H "Authorization: Bearer $API_KEY" -F "file=@$TMP;filename=index.html;type=text/html")
+  [[ -n "$PII_CHECK" ]] && UPDATE_ARGS+=(-F "pii_check=$PII_CHECK")
+  RESPONSE="$(curl -X PUT "${UPDATE_ARGS[@]}" "$API_URL/sites/$UPDATE_TARGET")"
+
+  PATCH_FIELDS=""
+  [[ -n "$PASSWORD" ]]      && PATCH_FIELDS="$PATCH_FIELDS,\"password\":\"$(json_escape "$PASSWORD")\""
+  [[ -n "$PUBLIC_SLUG" ]]   && PATCH_FIELDS="$PATCH_FIELDS,\"public_slug\":\"$(json_escape "$PUBLIC_SLUG")\""
+  [[ -n "$CLIENT" ]]        && PATCH_FIELDS="$PATCH_FIELDS,\"client\":\"$(json_escape "$CLIENT")\""
+  [[ "$BURN" -eq 1 ]]       && PATCH_FIELDS="$PATCH_FIELDS,\"burn_after_read\":true"
+  [[ "$AGENTATION" -eq 1 ]] && PATCH_FIELDS="$PATCH_FIELDS,\"agentation\":true"
+  if [[ "$EXPIRES_IN_HOURS" == "never" ]]; then
+    PATCH_FIELDS="$PATCH_FIELDS,\"expires_in_hours\":null"
+  elif [[ -n "$EXPIRES_IN_HOURS" ]]; then
+    PATCH_FIELDS="$PATCH_FIELDS,\"expires_in_hours\":$EXPIRES_IN_HOURS"
+  fi
+
+  if [[ -n "$PATCH_FIELDS" ]]; then
+    RESPONSE="$(curl -sS -X PATCH -H "Authorization: Bearer $API_KEY" \
+      -H 'content-type: application/json' \
+      -d "{${PATCH_FIELDS#,}}" "$API_URL/sites/$UPDATE_TARGET")"
+  fi
+  # No PATCH equivalent: the path inside a space is derived when the page is
+  # created. Say so rather than accepting the flag and doing nothing.
+  [[ -n "$CLIENT_PATH" ]] && echo "note: --client-path applies only when creating a page; on --update the page keeps its existing path in the client space." >&2
+  printf '%s' "$RESPONSE"
 else
+  ARGS=(-sS -H "Authorization: Bearer $API_KEY" -F "file=@$TMP;filename=index.html;type=text/html")
+  [[ -n "$PASSWORD" ]]         && ARGS+=(-F "password=$PASSWORD")
+  [[ -n "$EXPIRES_IN_HOURS" ]] && ARGS+=(-F "expires_in_hours=$EXPIRES_IN_HOURS")
+  [[ -n "$PUBLIC_SLUG" ]]      && ARGS+=(-F "public_slug=$PUBLIC_SLUG")
+  [[ -n "$PII_CHECK" ]]        && ARGS+=(-F "pii_check=$PII_CHECK")
+  [[ -n "$CLIENT" ]]           && ARGS+=(-F "client=$CLIENT")
+  [[ -n "$CLIENT_PATH" ]]      && ARGS+=(-F "client_path=$CLIENT_PATH")
+  [[ "$BURN" -eq 1 ]]          && ARGS+=(-F "burn_after_read=true")
+  [[ "$AGENTATION" -eq 1 ]]    && ARGS+=(-F "agentation=true")
+
   curl -X POST "${ARGS[@]}" "$API_URL/sites"
 fi
 echo
