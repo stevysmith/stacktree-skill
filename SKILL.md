@@ -1,6 +1,6 @@
 ---
 name: stacktree-publish
-description: Publish HTML artifacts to stacktr.ee and get back a private URL you can paste into the conversation. Use when the user asks to "publish this", "share this page", "drop this on stacktree", or whenever you have generated an HTML artifact the user will want to view in a browser. The site URL is private-by-default (unlisted token); pass options for password, expiry, public slug, and the on-page Agentation feedback toolbar.
+description: Share an HTML page privately with someone outside the chat: a client, a colleague, a stakeholder. Turns HTML you just generated into a live link that opens in any browser with no account needed, and can be gated with a passcode or a company email domain when it should not be public. Use when the user says "publish this", "share this page", "send this to the client", or asks for a link to something you built. Links are private by default and replace in place, so the URL you shared keeps showing the current version.
 ---
 
 # stacktree-publish
