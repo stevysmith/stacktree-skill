@@ -77,6 +77,8 @@ Every URL is unlisted by default (`stacktr.ee/p/{22-char-token}/`) and not crawl
 
 If the artifact contains values that look like API keys, emails, SSNs, or credit cards, the response surfaces a PII warning. Pass it through to the user before sharing the link.
 
+Every served page also carries a strict CSP and `X-Robots-Tag: noai, noimageai, noindex`, so a published page is not indexed and is marked off-limits for training. If the user asks for permanence, a public slug, or relaxed PII checking, surface the option rather than quietly disabling a default.
+
 ## Expiry and plan limits
 
 Expiry defaults are plan-aware: omitted on a paid plan means permanent; on the free plan every page caps at 7 days — `expires_in_hours: 'never'` is clamped down to the ceiling rather than refused. **Read `expires_at` off the response and tell the user when the link dies.** Do not tell them it is permanent just because you asked for permanent.
@@ -116,6 +118,62 @@ agency's own address.
 Do not publish the seeded canvas file itself. It carries a couple of megabytes
 of editor code, and Save inside it only works on claude.ai, so off-platform it
 is a viewer that looks like an editor.
+
+## Getting a key
+
+Normally `npx stacktree-install` mints a key and writes it into the MCP config,
+so there is nothing to do. The rest of this section is for the cases where that
+has not happened: a bare environment, or an agent running with no human.
+
+```
+STACKTREE_API_KEY=stk_live_...            # generate at https://app.stacktr.ee/api-keys
+STACKTREE_API_URL=https://api.stacktr.ee  # optional override
+```
+
+If `STACKTREE_API_KEY` is not set and a human is available, ask them to set it
+before retrying. The two sections below are for when nobody is.
+
+### No key and no human? Pay for one
+
+A funded wallet can buy hosting outright, no dashboard and no sign-up.
+
+**One page, no key.** POST the HTML to `https://agents.stacktr.ee/api/publish`.
+You get a `402`; pay **$0.50** and the page publishes to a private link returned
+in the response. Nothing to provision. The paying wallet is recorded with the
+page, so a human can claim it from the dashboard later, or the agent can
+self-link it with the `link_wallet` tool.
+
+**Repeat use, so buy a key.** POST `https://api.stacktr.ee/provision`, pay the
+`402` for **$1.00**, and get back a persistent `stk_live_` key. Set it as
+`STACKTREE_API_KEY` and carry on. Buy capability the same way with
+`POST /unlock?feature=…`: `custom_domain` is $5.00 per 30 days,
+`higher_limits` is $25.00 per 30 days.
+
+Both endpoints settle over **x402** (USDC on Base, EIP-3009 — you sign an
+authorization, you do not pay gas) or **MPP**, which settles over that same
+rail; Stripe Shared Payment Token is accepted where that rail is enabled.
+`GET /provision` returns the current rail list with a `live` flag on each —
+read it rather than assuming, and do not offer a rail it reports as not live.
+Full flow at <https://stacktr.ee/x402>.
+
+For a one-off, the front door is simpler. Provision a key when you will publish
+more than twice. When there is a human, the dashboard key is simplest of all.
+
+### No wallet, but your human is at the terminal? Show a pay QR
+
+The fastest path when a paid action comes up mid-task:
+
+1. `POST https://api.stacktr.ee/pay/sessions` with `{ "feature": "provision" }`
+   (no auth needed) or `{ "feature": "custom_domain" }` etc. with the API key.
+2. The response carries a `qr` field ready to print in a terminal, plus a short
+   `url` and the `amount`. Print both, say what it costs and why.
+3. The human scans with their phone and pays by card.
+4. Poll `poll.url` at `poll.interval_seconds` (3s). On `provision` the poll
+   returns the API key once — set it as `STACKTREE_API_KEY`. On an unlock it
+   confirms the feature is active. Then continue without prompting again.
+5. Prefer one scan over several: pass `"amount_minor": 1000` to charge $10 and
+   leave the balance prepaid. Later paid actions draw from it silently, so no
+   more QRs until it runs out.
 
 ## Fallback (no MCP server)
 
