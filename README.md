@@ -4,6 +4,18 @@ The official [Stacktree](https://stacktr.ee) skill for Claude Code, Cursor, Open
 
 When the user asks to "publish this", "share this page", or "drop this on stacktree", the agent pipes the HTML artifact to `stacktr.ee` and returns the private URL back into the conversation.
 
+## Set up with an agent
+
+If you have a coding agent open, hand it this line and it does the rest —
+installs, verifies the connection, and learns the tool surface:
+
+```
+Fetch and follow the setup instructions at https://stacktr.ee/prompt.md
+```
+
+Works in any agent that can fetch a URL. The instructions are plain Markdown;
+read them first if you like.
+
 ## The library
 
 This repo ships the general publish skill at the root, plus six job-shaped skills
@@ -95,3 +107,19 @@ Full feature set: <https://stacktr.ee>
 ## License
 
 MIT
+
+## scripts/
+
+`publish.sh` — the no-MCP fallback: HTML on stdin, private URL out.
+
+`design-to-stacktree.mjs` — renders a Claude Design canvas directory (the
+`.dc.html` artboards and `canvas.json` that `/design` leaves behind) into one
+static page: every direction in canvas order, each under its title with its
+canvas note as the rationale. Publish the result; do not publish the seeded
+canvas file, which carries megabytes of editor code and can only save on
+claude.ai.
+
+```
+node scripts/design-to-stacktree.mjs <canvas-dir> --out review.html \
+  --title "Client portal directions" --for "Meridian Group"
+```

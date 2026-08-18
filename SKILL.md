@@ -89,6 +89,34 @@ Reaching for `update_site` on an existing page instead of publishing a new one i
 
 When the user asks to improve, polish, redesign, or "make beautiful" a published page, call `get_design_guide` FIRST and follow its workflow exactly. The short version: assess before restyling (a page that already has a deliberate design gets elevated in its own voice or left alone — never flattened to a house look), keep every fact/row/link intact, respect the CSP (no external fonts under strict CSP — use system stacks), then `update_site` in place so the shared link keeps working. Tell the user the direction you chose and that all content survived.
 
+## Handing over a design canvas
+
+Claude Code's `/design` command leaves a directory behind: one
+`<Name>.dc.html` per artboard plus a `canvas.json` holding the layout, the
+titles and the sticky notes. That is the design *and* the argument for it,
+which is what a client is actually shown — but the artboards are not
+publishable as they stand. They load a `./support.js` that has no on-disk
+existence, so opened raw they render with literal `{{ }}` holes and one row
+per loop.
+
+Render them first:
+
+```
+node scripts/design-to-stacktree.mjs <canvas-dir> --out review.html \
+  --title "Client portal directions" --for "Meridian Group"
+```
+
+It runs each artboard's `renderVals()`, expands the loops and interpolation,
+scopes the CSS so the artboards share one document, and writes a single static
+page: directions in canvas order, each under its title with its canvas note
+beside it as the rationale. Then `publish_html` that file, passing `client`
+so it lands in the client's space and comes back with a `client_url` on the
+agency's own address.
+
+Do not publish the seeded canvas file itself. It carries a couple of megabytes
+of editor code, and Save inside it only works on claude.ai, so off-platform it
+is a viewer that looks like an editor.
+
 ## Fallback (no MCP server)
 
 If for some reason the stacktree MCP server isn't available in this session — you don't see `publish_html` in your tool list — the skill includes a shell-script fallback at `scripts/publish.sh`. It reads `STACKTREE_API_KEY` from the environment and POSTs to the public REST API. Use it only when MCP isn't an option; the MCP path is preferred.
