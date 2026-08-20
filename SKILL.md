@@ -1,6 +1,6 @@
 ---
 name: stacktree-publish
-description: Share an HTML page privately with someone outside the chat: a client, a colleague, a stakeholder. Turns HTML you just generated into a live link that opens in any browser with no account needed, and can be gated with a passcode or a company email domain when it should not be public. Use when the user says "publish this", "share this page", "send this to the client", or asks for a link to something you built. Links are private by default and replace in place, so the URL you shared keeps showing the current version.
+description: 'Share an HTML page privately with someone outside the chat: a client, a colleague, a stakeholder. Turns HTML you just generated into a live link that opens in any browser with no account needed, and can be gated with a passcode or a company email domain when it should not be public. Use when the user says "publish this", "share this page", "send this to the client", or asks for a link to something you built. Links are private by default and replace in place, so the URL you shared keeps showing the current version.'
 ---
 
 # stacktree-publish
