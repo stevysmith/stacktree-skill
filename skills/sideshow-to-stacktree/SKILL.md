@@ -1,6 +1,6 @@
 ---
 name: stacktree-sideshow-handoff
-description: Publish a Sideshow surface (or any locally-viewed agent artifact) to a private Stacktree link when it needs to leave the workbench — a client, a colleague, or your own phone needs to open it without a viewer running. Use when the user says "send this surface to…", "share this outside", "publish this sideshow", or a review artifact is finished and the audience is not at this terminal. Composes sideshow (the local iteration surface) with Stacktree (the standalone delivery link).
+description: 'Publish a Sideshow surface (or any locally-viewed agent artifact) to a private Stacktree link when it needs to leave the workbench — a client, a colleague, or your own phone needs to open it without a viewer running. Use when the user says "send this surface to…", "share this outside", "publish this sideshow", or a review artifact is finished and the audience is not at this terminal. Composes sideshow (the local iteration surface) with Stacktree (the standalone delivery link).'
 ---
 
 # stacktree-sideshow-handoff

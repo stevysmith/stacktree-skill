@@ -1,6 +1,6 @@
 ---
 name: stacktree-agent-run-report
-description: Publish what your agent just produced as a private web page, shareable with anyone who has the link. Use right after a run produces a report, audit, analysis, or a dashboard the agent built on demand, the kind that reads better in a browser than dumped in the chat, and the user wants a link to send to colleagues with no account or workspace required. Fits the throwaway, on-demand dashboard pattern (gather the data, render the HTML, share a private link that expires on its own) as well as longer run reports. Produces a page in the Agent run report shape (KPI header, findings, recommended order), keeps it unlisted with a sensible default expiry, and is built to be refreshed in place on re-run.
+description: 'Publish what your agent just produced as a private web page, shareable with anyone who has the link. Use right after a run produces a report, audit, analysis, or a dashboard the agent built on demand, the kind that reads better in a browser than dumped in the chat, and the user wants a link to send to colleagues with no account or workspace required. Fits the throwaway, on-demand dashboard pattern (gather the data, render the HTML, share a private link that expires on its own) as well as longer run reports. Produces a page in the Agent run report shape (KPI header, findings, recommended order), keeps it unlisted with a sensible default expiry, and is built to be refreshed in place on re-run.'
 ---
 
 # stacktree-agent-run-report

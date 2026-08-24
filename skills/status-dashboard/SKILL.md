@@ -1,6 +1,6 @@
 ---
 name: stacktree-status-dashboard
-description: Publish a live status or health page that anyone can check at a clean public URL, refreshed in place as conditions change. Use for a public status page, uptime/health dashboard, or "is it up" page meant to be linked from a footer or shared widely with no login. This is the one job where a public slug is the right call. Produces a page in the Status dashboard shape, gives it a public {slug}.stacktr.ee URL, and updates the same site on every refresh.
+description: 'Publish a live status or health page that anyone can check at a clean public URL, refreshed in place as conditions change. Use for a public status page, uptime/health dashboard, or "is it up" page meant to be linked from a footer or shared widely with no login. This is the one job where a public slug is the right call. Produces a page in the Status dashboard shape, gives it a public {slug}.stacktr.ee URL, and updates the same site on every refresh.'
 ---
 
 # stacktree-status-dashboard

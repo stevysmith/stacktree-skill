@@ -1,6 +1,6 @@
 ---
 name: stacktree-client-deliverable
-description: Hand a finished report or proposal to a client at a private link. Use when the user says "send this to the client", "share this with <company>", "this is for a customer", or is handing a polished deliverable to someone outside their team. Produces a page in the Client deliverable shape (a clean editorial "sheet" prepared-for-a-named-recipient), gates it to the recipient, removes the auto-expiry so the link stays live, and refuses to ship if the page leaks PII.
+description: 'Hand a finished report or proposal to a client at a private link. Use when the user says "send this to the client", "share this with <company>", "this is for a customer", or is handing a polished deliverable to someone outside their team. Produces a page in the Client deliverable shape (a clean editorial "sheet" prepared-for-a-named-recipient), gates it to the recipient, removes the auto-expiry so the link stays live, and refuses to ship if the page leaks PII.'
 ---
 
 # stacktree-client-deliverable

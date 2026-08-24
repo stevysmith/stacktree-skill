@@ -1,6 +1,6 @@
 ---
 name: stacktree-daily-brief
-description: Publish a dated morning brief or digest to one stable link and refresh it in place each day, rather than minting a new URL every time. Use for a recurring digest (a market/news brief, a standup summary, a metrics digest) the user wants to bookmark once and re-read each morning. Suits a scheduled or agent-loop refresh. Produces a page in the Daily brief shape and always updates the same site via update_site, so the bookmark never breaks.
+description: 'Publish a dated morning brief or digest to one stable link and refresh it in place each day, rather than minting a new URL every time. Use for a recurring digest (a market/news brief, a standup summary, a metrics digest) the user wants to bookmark once and re-read each morning. Suits a scheduled or agent-loop refresh. Produces a page in the Daily brief shape and always updates the same site via update_site, so the bookmark never breaks.'
 ---
 
 # stacktree-daily-brief

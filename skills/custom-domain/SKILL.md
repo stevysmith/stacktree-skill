@@ -1,6 +1,6 @@
 ---
 name: stacktree-custom-domain
-description: Buy a real domain and stand up a private Stacktree site on it, end to end, paying with USDC over x402, no human in the loop. Use when an agent needs to publish to its own branded domain (mybrand.com) rather than a stacktr.ee link and has no domain to point yet. Composes stabledomains.dev (the x402 domain registrar) with Stacktree custom domains.
+description: 'Buy a real domain and stand up a private Stacktree site on it, end to end, paying with USDC over x402, no human in the loop. Use when an agent needs to publish to its own branded domain (mybrand.com) rather than a stacktr.ee link and has no domain to point yet. Composes stabledomains.dev (the x402 domain registrar) with Stacktree custom domains.'
 ---
 
 # stacktree-custom-domain
