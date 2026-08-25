@@ -14,7 +14,7 @@ description: |
   - "publish", "host", "share this page", "make me a page", "send me a link"
   - "morning brief", "daily report", "dashboard", "status page", "field notes"
   - "update the page", "same link", "private link", "passcode", "x402"
-version: 1.0.0
+version: 1.0.1
 homepage: https://stacktr.ee
 metadata:
   openclaw:
@@ -105,14 +105,21 @@ contract wallet, use `claim_url` instead and update through the account.
 `npm install` once in `scripts/`):
 
 ```bash
-WALLET_PRIVATE_KEY=0x… node scripts/update-page.mjs --site <id> --file new.html
+node scripts/update-page.mjs --site <id> --file new.html
 ```
 
-The key must be the paying wallet's. If agentcash made the payment, that wallet
-lives at `~/.agentcash/wallet.json`; if your wallet skill won't hand you its
-key, the claim path above covers you. The signed message is harmless by
-construction — it says exactly what it grants (one content update to pages this
-wallet paid for) and authorizes no transaction and no spend.
+It reads the paying wallet's key itself, from `~/.agentcash/wallet.json` by
+default (`--key-file` for anywhere else). **Do not read that key into your own
+context or put it in a command.** It is a funded wallet and the standing
+update credential for every page it paid for, so a key that reaches your
+transcript is a key that reaches whoever can read your logs — and it would let
+them silently replace the content behind a link your human already sent their
+client. If your wallet won't hand over a key at all, the claim path above
+covers you.
+
+The signature itself is harmless by construction: the message says exactly what
+it grants (one content update to pages this wallet paid for) and authorizes no
+transaction and no spend.
 
 ## The standing-page pattern
 
@@ -120,7 +127,7 @@ This is the shape personal agents actually need: publish the morning brief once
 ($0.50), keep the URL in the chat channel or a bookmark, then every run
 
 ```bash
-WALLET_PRIVATE_KEY=0x… node scripts/update-page.mjs --site <id> --file brief.html
+node scripts/update-page.mjs --site <id> --file brief.html
 ```
 
 One link that is always current. Your human bookmarks it once; you never send a

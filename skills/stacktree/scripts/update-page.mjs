@@ -9,12 +9,20 @@
 //   3. PUT {api}/sites/{id} (multipart `file`) with Authorization: Wallet ...
 //
 // Usage:
-//   WALLET_PRIVATE_KEY=0x… node update-page.mjs --site <id-or-token> --file <new.html>
+//   node update-page.mjs --site <id-or-token> --file <new.html>
 // Options:
-//   --api <base>   default https://api.stacktr.ee
+//   --key-file <path>  wallet to sign with; default ~/.agentcash/wallet.json
+//   --api <base>       default https://api.stacktr.ee
+//
+// The key is read from disk here, on purpose. Never pass it on the command
+// line and never read it into your own context: it is a funded wallet AND the
+// standing update credential for every page it paid for, so anything that
+// logs your transcript ends up holding both.
 //
 // Setup once, in this scripts directory: npm install   (pulls `viem`)
 import { readFile } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { privateKeyToAccount } from 'viem/accounts';
 
 const arg = (name, fallback) => {
@@ -24,9 +32,26 @@ const arg = (name, fallback) => {
 const site = arg('site');
 const file = arg('file');
 const api = arg('api', 'https://api.stacktr.ee').replace(/\/+$/, '');
-const pk = process.env.WALLET_PRIVATE_KEY;
-if (!site || !file || !pk) {
-  console.error('usage: WALLET_PRIVATE_KEY=0x… node update-page.mjs --site <id-or-token> --file <new.html> [--api https://api.stacktr.ee]');
+const keyFile = arg('key-file', join(homedir(), '.agentcash', 'wallet.json'));
+if (!site || !file) {
+  console.error('usage: node update-page.mjs --site <id-or-token> --file <new.html> [--key-file ~/.agentcash/wallet.json] [--api https://api.stacktr.ee]');
+  process.exit(2);
+}
+
+// Env var still works for wallets that live somewhere else entirely, but the
+// file is the default so the common path never puts a key in a command.
+let pk = process.env.WALLET_PRIVATE_KEY;
+if (!pk) {
+  try {
+    const raw = await readFile(keyFile, 'utf8');
+    pk = keyFile.endsWith('.json') ? JSON.parse(raw).privateKey : raw.trim();
+  } catch {
+    console.error(`no wallet key: ${keyFile} is unreadable. Pass --key-file, or set WALLET_PRIVATE_KEY in the environment (not on the command line).`);
+    process.exit(2);
+  }
+}
+if (!pk) {
+  console.error(`no privateKey field in ${keyFile}`);
   process.exit(2);
 }
 
