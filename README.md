@@ -42,7 +42,26 @@ public versus unlisted, and whether the page is refreshed in place. Each job ski
 mirrors the matching onboarding template in `apps/web/src/templates.ts`, so the
 published page lands in a shape the user already recognizes.
 
-## Install
+## Install as a Claude Code plugin
+
+The whole library installs in one step as a plugin, which also wires up the
+Stacktree MCP server — so there is no API key to export, and the first publish
+opens an OAuth consent screen instead:
+
+```bash
+claude plugin marketplace add stevysmith/stacktree-skill
+claude plugin install stacktree@stacktree-skill
+```
+
+Skills arrive namespaced, as `/stacktree:stacktree-publish` and so on. To try it
+before installing, point Claude Code at a clone:
+`claude --plugin-dir ./stacktree-skill`.
+
+Free accounts get 3 pages for life, passcode gates on up to 3 of them, and
+expiry up to 7 days. Company-email gates, client spaces, custom domains and
+viewer analytics are on the paid tiers.
+
+## Install a single skill
 
 Browse the library and pick what you want at the prompt:
 

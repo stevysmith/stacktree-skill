@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "stacktree": {
+      "type": "http",
+      "url": "https://api.stacktr.ee/mcp"
+    }
+  }
+}

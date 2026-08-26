@@ -1,0 +1,13 @@
+{
+  "name": "stacktree",
+  "description": "Publish HTML to a private link that opens in any browser, with no account for the viewer. Use when you have built a report, dashboard, audit, brief, prototype or one-page site and need to put it in front of someone who is not at your terminal. Links are unguessable by default, can be passcode-gated or restricted to a company email domain, expire on a schedule, and replace in place so a URL you already sent never goes stale.",
+  "version": "0.1.0",
+  "homepage": "https://stacktr.ee",
+  "repository": "https://github.com/stevysmith/stacktree-skill",
+  "license": "MIT",
+  "keywords": ["html", "publish", "hosting", "share", "link", "client-delivery", "report", "dashboard", "mcp"],
+  "author": {
+    "name": "Stacktree",
+    "url": "https://stacktr.ee"
+  }
+}

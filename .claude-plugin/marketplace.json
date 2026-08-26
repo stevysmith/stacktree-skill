@@ -1,0 +1,15 @@
+{
+  "name": "stacktree-skill",
+  "description": "The official Stacktree skills and Claude Code plugin: publish HTML to a private, unguessable link that opens in any browser, with no account for the viewer.",
+  "owner": {
+    "name": "Stacktree",
+    "url": "https://stacktr.ee"
+  },
+  "plugins": [
+    {
+      "name": "stacktree",
+      "source": "./",
+      "description": "Publish HTML to a private link that opens in any browser, with no account for the viewer. Ships the publish skill plus the job-shaped skills (client deliverable, agent run report, daily brief, status dashboard) and the Stacktree MCP server."
+    }
+  ]
+}
