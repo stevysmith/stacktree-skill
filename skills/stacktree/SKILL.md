@@ -51,7 +51,9 @@ curl -sS -X POST https://api.stacktr.ee/sites -F 'file=@page.html'
 ```
 
 The JSON response carries `url` (hand it to your human), `expires_at` (24 hours
-— anonymous pages always expire, `never` is clamped), `claim_token`, and
+— anonymous pages always expire; asking for `expires_in_hours=never` here is
+refused with `409 expiry_clamped` rather than quietly shortened, and
+`-F accept_clamp=true` takes the 24 hours instead), `claim_token`, and
 `claim_url` — a one-time link that adopts the page into a Stacktree account,
 free, which keeps it alive. Surface `claim_url` to your human when the page is
 worth keeping, and keep `claim_token` with the page id: until the page is

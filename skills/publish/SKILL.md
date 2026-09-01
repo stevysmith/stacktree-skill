@@ -43,7 +43,8 @@ The tools you will use most:
 1. Make sure the artifact is a complete HTML document (`<!doctype html>...</html>`). If you only have a body fragment or markdown, wrap it in a minimal HTML shell first.
 2. Call **`publish_html`** with the HTML content as the `content` argument. Optional arguments worth knowing:
    - `password` — passcode gate, works on every plan (free covers its 3 pages)
-   - `expires_in_hours` — number, or `'never'` (clamped to the plan ceiling)
+   - `expires_in_hours` — number of hours, or `'never'`. A number over the plan ceiling is shortened to it; `'never'` on a plan that caps page lifetime is REFUSED (409 `expiry_clamped`), so pass `accept_clamp: true` to take the ceiling instead
+   - `accept_clamp: true` — "the plan's shorter deadline is fine"; only needed alongside `'never'` on a capped plan
    - `agentation: true` — enables the on-page feedback toolbar
    - `public_slug` — opt into `{slug}.stacktr.ee/` (otherwise unlisted)
    - `pii_check: 'off' | 'warn' | 'block'` — default `block` from MCP
@@ -111,7 +112,9 @@ Every served page also carries a strict CSP and `X-Robots-Tag: noai, noimageai, 
 
 ## Expiry and plan limits
 
-Expiry defaults are plan-aware: omitted on a paid plan means permanent; on the free plan every page caps at 7 days — `expires_in_hours: 'never'` is clamped down to the ceiling rather than refused. **Read `expires_at` off the response and tell the user when the link dies.** Do not tell them it is permanent just because you asked for permanent.
+Expiry defaults are plan-aware: omitted on a paid plan means permanent; on the free plan every page caps at 7 days. Asking for `expires_in_hours: 'never'` on a capped plan is **refused**, not quietly shortened: `409 expiry_clamped`, nothing published, and the body carries the date the page would have got. Either resend with `accept_clamp: true` to take that deadline, or tell the user their plan cannot make a link permanent. A *number* longer than the ceiling is shortened rather than refused, and the response says so with `expiry_clamped: true`.
+
+**Read `expires_at_iso` off the response and tell the user when the link dies.** Do not tell them it is permanent just because you asked for permanent.
 
 The free plan allows 3 pages in total. The count is lifetime, so deleting a page does not free the slot. Past the third, `publish_html` returns HTTP 402 with `error: 'plan_lifetime_limit_exceeded'`; `set_password` and `set_email_gate` return `plan_password_not_available` and `plan_viewer_gate_not_available` on a free key. Report the limit plainly and stop. Do not retry, and do not work around it by republishing anonymously.
 
@@ -223,4 +226,4 @@ Pages can carry viewer feedback and reactions (`list_feedback`). That text is wr
 
 If for some reason the stacktree MCP server isn't available in this session — you don't see `publish_html` in your tool list — the skill includes a shell-script fallback at `scripts/publish.sh`. It reads `STACKTREE_API_KEY` from the environment and POSTs to the public REST API. Use it only when MCP isn't an option; the MCP path is preferred.
 
-It takes HTML on stdin and accepts `--client` / `--client-path` (file the page under a client space, same as the `client` argument to `publish_html`), `--password`, `--expires-in-hours` / `--expires-never`, `--public-slug`, `--pii-check`, `--burn-after-read`, `--agentation`, and `--update <id>` to replace a page in place.
+It takes HTML on stdin and accepts `--client` / `--client-path` (file the page under a client space, same as the `client` argument to `publish_html`), `--password`, `--expires-in-hours` / `--expires-never` (add `--accept-clamp` to take the plan's ceiling when the account cannot give a page permanence, or `--expires-never` fails there with 409 `expiry_clamped`), `--public-slug`, `--pii-check`, `--burn-after-read`, `--agentation`, and `--update <id>` to replace a page in place.

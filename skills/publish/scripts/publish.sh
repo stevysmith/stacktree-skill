@@ -19,6 +19,11 @@ CLIENT=""
 CLIENT_PATH=""
 BURN=0
 AGENTATION=0
+# "The plan's shorter deadline is fine." Only meaningful alongside a request for
+# a page that never expires: on a plan that caps page lifetime that request is
+# refused (409 expiry_clamped) rather than silently turned into a 7-day page, so
+# without this flag --expires-never simply fails there, which is the point.
+ACCEPT_CLAMP=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -26,6 +31,7 @@ while [[ $# -gt 0 ]]; do
     --password)           PASSWORD="$2"; shift 2 ;;
     --expires-in-hours)   EXPIRES_IN_HOURS="$2"; shift 2 ;;
     --expires-never)      EXPIRES_IN_HOURS="never"; shift ;;
+    --accept-clamp)       ACCEPT_CLAMP=1; shift ;;
     --public-slug)        PUBLIC_SLUG="$2"; shift 2 ;;
     --pii-check)          PII_CHECK="$2"; shift 2 ;;
     --client)             CLIENT="$2"; shift 2 ;;
@@ -62,6 +68,7 @@ if [[ -n "$UPDATE_TARGET" ]]; then
   [[ "$AGENTATION" -eq 1 ]] && PATCH_FIELDS="$PATCH_FIELDS,\"agentation\":true"
   if [[ "$EXPIRES_IN_HOURS" == "never" ]]; then
     PATCH_FIELDS="$PATCH_FIELDS,\"expires_in_hours\":null"
+    [[ "$ACCEPT_CLAMP" -eq 1 ]] && PATCH_FIELDS="$PATCH_FIELDS,\"accept_clamp\":true"
   elif [[ -n "$EXPIRES_IN_HOURS" ]]; then
     PATCH_FIELDS="$PATCH_FIELDS,\"expires_in_hours\":$EXPIRES_IN_HOURS"
   fi
@@ -79,6 +86,7 @@ else
   ARGS=(-sS -H "Authorization: Bearer $API_KEY" -F "file=@$TMP;filename=index.html;type=text/html")
   [[ -n "$PASSWORD" ]]         && ARGS+=(-F "password=$PASSWORD")
   [[ -n "$EXPIRES_IN_HOURS" ]] && ARGS+=(-F "expires_in_hours=$EXPIRES_IN_HOURS")
+  [[ "$ACCEPT_CLAMP" -eq 1 ]]  && ARGS+=(-F "accept_clamp=true")
   [[ -n "$PUBLIC_SLUG" ]]      && ARGS+=(-F "public_slug=$PUBLIC_SLUG")
   [[ -n "$PII_CHECK" ]]        && ARGS+=(-F "pii_check=$PII_CHECK")
   [[ -n "$CLIENT" ]]           && ARGS+=(-F "client=$CLIENT")
