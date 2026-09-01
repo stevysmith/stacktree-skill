@@ -35,7 +35,8 @@ The tools you will use most:
 | `create_client_space` | Create a client space up front (publishing auto-creates one anyway). |
 | `update_client_space` | Rename, archive/unarchive, or gate a whole client space. |
 | `delete_client_space` | Delete a space; its pages detach and keep working.      |
-| `delete_site`        | Hard delete a site.                                      |
+| `delete_site`        | Take a page down. The link dies now; content kept 30 days. |
+| `restore_site`       | Put a deleted or expired page back at the same URL.      |
 
 ## Steps
 
@@ -70,6 +71,35 @@ A space can carry its own **address** (`acme.theiragency.com`) and a generated *
 Managing the spaces themselves is a separate, rarely needed set: `create_client_space` sets a client up before any work ships, `update_client_space` renames one, archives or unarchives it, and sets the `password` / `allowed_email_domain` gate that covers every page in the space, and `delete_client_space` removes it. When a client is simply finished, archive rather than delete: archiving keeps the pages, the portal and the address serving while freeing the plan slot, and it is reversible. Deleting never deletes pages either — they detach to floating pages on their existing URLs — but the portal and the address stop resolving.
 
 If `update_site` returns **409 `managed_portal`**, the page is that generated portal: it regenerates from its space, so direct edits would be overwritten. Don't retry — tell the user they can "customize" the portal from the space's settings in the dashboard, which stops regeneration and makes it an ordinary editable page.
+
+## Taking a page down, and undoing it
+
+`delete_site` stops the page serving at that moment: every link already sent is
+dead, with no preview and no way back in. It is not permanent, though. The
+content is kept for **30 days**, and `restore_site` puts the page back at the
+same URL, with the same id, token, slug and read history, any time in that
+window. After 30 days the content is destroyed and nobody can bring it back.
+
+Two things follow from that, and both matter to the user:
+
+- Say "the link stops working now" when you take a page down, not "it's gone
+  forever". A page that ran out of time behaves the same way, so a user who
+  thought they had lost a deliverable usually has not.
+- When `update_site`, `set_expiry` or another settings call answers **409
+  `site_deleted`**, call `restore_site` on the same id and retry. Do not
+  `publish_html` it again: that mints a second page at a different URL, strands
+  everyone holding the old link, and spends another of the free plan's three
+  lifetime pages, while a restore spends none.
+
+Restore is a rescue, not a renewal. Read `expires_at` and `restored_for` off the
+response and tell the user that date: `"grace"` means the page had expired and
+comes back for 48 hours rather than a fresh full window (this is what free-plan
+pages get), `"plan"` means it got the normal window for the plan.
+
+Two cases skip the 30 days and cannot be undone, by design: a page published
+with `burn_after_read` is destroyed in the request that serves its one view, and
+a page taken down for abuse is never restorable. Both answer `restore_site` with
+a 404.
 
 ## Privacy
 
