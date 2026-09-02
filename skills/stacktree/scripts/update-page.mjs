@@ -6,7 +6,7 @@
 // no fees, nothing on-chain — the signature only proves you hold the wallet.
 //   1. POST {api}/wallet-auth/challenge { wallet }   -> { challenge, message }
 //   2. personal_sign the exact `message` text
-//   3. PUT {api}/sites/{id} (multipart `file`) with Authorization: Wallet ...
+//   3. PUT {api}/sites/{id} with {"html": "..."} and Authorization: Wallet ...
 //
 // Usage:
 //   node update-page.mjs --site <id-or-token> --file <new.html>
@@ -73,12 +73,16 @@ if (!challengeRes.ok) {
 // server verifies against that exact string. Never reconstruct it locally.
 const sig = await account.signMessage({ message: challenge.message });
 
-const form = new FormData();
-form.set('file', new Blob([await readFile(file)], { type: 'text/html' }), 'index.html');
+// JSON, not multipart: PUT takes the same body shape POST /publish takes, so a
+// revision is the same document at a different verb. (Multipart still works and
+// is the only shape that carries a zip, a PDF, or e2e ciphertext.)
 const putRes = await fetch(`${api}/sites/${encodeURIComponent(site)}`, {
   method: 'PUT',
-  headers: { authorization: `Wallet challenge=${challenge.challenge},sig=${sig}` },
-  body: form,
+  headers: {
+    authorization: `Wallet challenge=${challenge.challenge},sig=${sig}`,
+    'content-type': 'application/json',
+  },
+  body: JSON.stringify({ html: await readFile(file, 'utf8') }),
 });
 const out = await putRes.json();
 console.log(JSON.stringify(out, null, 2));

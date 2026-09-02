@@ -94,6 +94,18 @@ Probe terms without paying: `GET https://api.stacktr.ee/publish` returns the
 current 402 challenge, prices, and accepted rails. Payment is EIP-3009 USDC —
 you sign an authorization; you never hold ETH or pay gas.
 
+Take `payTo` from the live 402 envelope, never from your wallet's transaction
+history: on 1 September 2026 a wallet that had paid us received dust from an
+address built to look like our payee (same four-character head, same
+three-character tail). Standard address poisoning, and a bot is watching
+payments to us.
+
+**Keep `next.receipt_url` from the response.** It is a stable link to every page
+your wallet has paid for, with the exact request that revises each one and a
+button to move them into an account. Same link every time that wallet pays. The
+link is the credential, so treat it like the pages: we do not accept the payer
+address in its place, because payer addresses are public on chain.
+
 ## Update in place — never pay twice
 
 Republishing to revise a page is the one mistake every agent makes here. Don't:
@@ -109,8 +121,14 @@ Nothing to install, nothing to sign, no extra round trip:
 ```bash
 curl -sS -X PUT https://api.stacktr.ee/sites/<id> \
   -H "Authorization: Claim <claim_token>" \
-  -F 'file=@page.html'
+  -H "Content-Type: application/json" \
+  --data-binary @revision.json
 ```
+
+`revision.json` is `{"html": "<!doctype html>..."}`: the same body shape you
+published with, at a different verb. `-F 'file=@page.html'` instead of the last
+two lines does the same thing, and is the only shape that carries a zip, a PDF,
+or e2e ciphertext.
 
 Same URL, new content, $0. Use this if you paid on Solana, if you published
 free and anonymously, or if you have `curl` and nothing else. What to know
@@ -141,8 +159,9 @@ account that claimed it. Three steps, one signed message, no funds moved:
 1. `POST https://api.stacktr.ee/wallet-auth/challenge` with `{"wallet":"0x…"}`
    (the wallet that paid). Response: `{ challenge, message, expires_at }`.
 2. `personal_sign` (EIP-191) the exact `message` text with that wallet.
-3. `PUT https://api.stacktr.ee/sites/{id}` — multipart, field `file` = the new
-   HTML — with header `Authorization: Wallet challenge=WAUTH-…,sig=0x…`.
+3. `PUT https://api.stacktr.ee/sites/{id}`, sending `{"html": "..."}` as
+   `application/json` (or multipart with a `file` field), carrying the header
+   `Authorization: Wallet challenge=WAUTH-…,sig=0x…`.
 
 Same URL, new content, $0. Challenges are single-use with a 5-minute TTL: one
 fresh challenge per update. EVM EOA wallets only; if you paid from Solana or a
@@ -177,7 +196,8 @@ This is the shape personal agents actually need: publish the morning brief once
 ```bash
 curl -sS -X PUT https://api.stacktr.ee/sites/<id> \
   -H "Authorization: Claim <claim_token>" \
-  -F 'file=@brief.html'
+  -H "Content-Type: application/json" \
+  --data-binary @brief.json
 ```
 
 (or `node scripts/update-page.mjs --site <id> --file brief.html` if you paid
