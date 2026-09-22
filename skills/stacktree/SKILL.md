@@ -59,10 +59,26 @@ free, which keeps it alive. Surface `claim_url` to your human when the page is
 worth keeping, and keep `claim_token` with the page id: until the page is
 claimed, that token is what updates the page in place (next section).
 
-Claim it **before** `expires_at`. At the deadline the page stops serving and the
-claim link answers 410: the content is held for 30 days after that, but only an
-account that already owns a page can restore it, and an anonymous page has no
-owner. So an unclaimed page is not recoverable once its 24 hours are up.
+Your human is usually not reading this response, so do one of two things.
+Say it aloud: the response's `next.keep` is the sentence, with the deadline and
+the link already in it. Or hand the link over by email, without you in the
+loop:
+
+```bash
+curl -sS -X POST https://api.stacktr.ee/sites/<id>/keep \
+  -H 'content-type: application/json' \
+  -d '{"claim_token":"<claim_token>","email":"<their address>"}'
+```
+
+That sends the claim link and the deadline now, and one reminder as the page
+runs out. The address is stored on the page, used for those two emails only,
+and cleared by the claim. Ask before you send someone's address anywhere,
+including here.
+
+At the deadline the page stops serving, but the claim link keeps working for
+the 30 days the content is held, and claiming an expired page brings it back
+at the same address. Past the 30 days it is gone. Publishing again in the
+meantime mints a second URL; claim instead.
 
 Options as extra form fields: `-F 'password=…'` (passcode-gate the page — works
 anonymously), `-F 'expires_in_hours=2'`, `-F 'burn_after_read=true'`.
@@ -137,9 +153,10 @@ before you build a loop on it:
 - It stops working **the moment the page is claimed**: claiming rotates the
   token into the account, and from then on only that account's API key or OAuth
   token can update the page. That is the intended handover, not a fault.
-- It is refused on an expired page. A free anonymous page still dies at 24
-  hours and cannot be restored, so claim it if it must outlive that. An x402
-  page never expires, so its token works until someone claims it.
+- It is refused as an UPDATE credential on an expired page. A free anonymous
+  page still dies at 24 hours; the claim link brings it back for 30 days after
+  that, and updates resume with the account's credential. An x402 page never
+  expires, so its token works until someone claims it.
 - 30 updates per hour per IP, standard `RateLimit` headers on the response.
 - It replaces the content of that one page and nothing else: it cannot claim,
   delete, change settings, or touch any other page.
@@ -272,10 +289,10 @@ Session cookies are refused there; send one credential, never two.
 | `429` with `Retry-After` | Anonymous daily cap (20/day/IP) | Wait it out, or switch to x402 / a key |
 | `413` | Page over 10 MB | Trim the page; inline assets are usually the culprit |
 | `422` (phishing or PII) | Content tripped the abuse or PII guard | Report the reason to your human; do not retry around it |
-| Response carries `claim_token` | Page is unowned (free path: expires in 24h) | Keep the token: it updates the page in place. Surface `claim_url` to your human — claiming is free and keeps the page, but only before `expires_at` |
+| Response carries `claim_token` | Page is unowned (free path: expires in 24h) | Keep the token: it updates the page in place. Say `next.keep` to your human, or `POST /sites/<id>/keep` with their email so the link and one reminder reach them |
 | `403 invalid_claim_token` on `PUT` | Wrong token, or the page was claimed (a claim rotates the token into the account) | If your human claimed it, update it with that account's API key; do not republish |
-| `410 expired` on `PUT` | The unclaimed page reached `expires_at` | Publish again; an unclaimed page cannot be restored |
-| `410` on a claim link | The 24 hours ran out before anyone claimed it | Publish again; an unclaimed page cannot be restored |
+| `410 expired` on `PUT` | The unclaimed page reached `expires_at` | Do not republish: the claim link still works for 30 days and brings the page back, then updates resume with the account's key |
+| `410` on a claim link | More than 30 days since the page expired, or it was taken down | Publish again; nothing is left to claim |
 
 Report prices and expiry honestly: read `expires_at` and `url` off the real
 response rather than promising them in advance.
