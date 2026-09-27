@@ -99,6 +99,22 @@ persistent `stk_live_` key for $1 over the same rails; upgrades (custom domain,
 higher limits) are bought the same way via `POST /unlock`. The wallet that pays
 can later claim its pages from the dashboard or via the `link_wallet` MCP tool.
 
+### Credentials and where they go
+
+The plugin reads two credentials from your machine, and neither leaves it for
+anywhere but Stacktree's own API.
+
+- **`STACKTREE_API_KEY`** is read by `skills/publish/scripts/publish.sh` and the
+  curl examples in the skills' `SKILL.md` files. It is sent only as a Bearer
+  token to `https://api.stacktr.ee` (or `STACKTREE_API_URL` if you override it).
+- **Wallet key** (`~/.agentcash/wallet.json`, or `WALLET_PRIVATE_KEY`) is read
+  by `skills/stacktree/scripts/update-page.mjs`. The private key is never sent:
+  it signs a one-time challenge locally, and only the wallet address and
+  signature go to `https://api.stacktr.ee`.
+
+The MCP server in `.mcp.json` takes no credential from your environment. It
+signs in with OAuth in the browser.
+
 ## What the agent gets
 
 The skill exposes one shell script — `publish.sh` — that the agent invokes when it has an HTML artifact ready to share. Supported flags:
