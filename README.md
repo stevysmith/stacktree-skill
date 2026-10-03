@@ -18,15 +18,16 @@ read them first if you like.
 
 ## The library
 
-This repo ships the general publish skill at the root, plus six job-shaped skills
-under `skills/`. Each job skill maps 1:1 to a validated Stacktree onboarding template
+This repo ships the general publish skill, the curl-first `stacktree` skill and six
+job-shaped skills, all under `skills/`. Each job skill maps 1:1 to a validated Stacktree onboarding template
 and encodes the judgment for that job (the right gate, the right lifecycle, the right
 URL), not just the API call. The agent picks the job skill that matches the user's
 intent and falls back to the general skill for anything else.
 
 | Skill | Path | Job |
 |---|---|---|
-| `stacktree-publish` | root `SKILL.md` | Publish any HTML artifact and get back a private URL. The general path. |
+| `stacktree-publish` | `skills/publish/` | Publish any HTML artifact and get back a private URL. The general path. |
+| `stacktree` | `skills/stacktree/` | The curl-first path for agents with no MCP server: free anonymous pages for 24 hours, or a permanent page paid for over x402. |
 | `stacktree-client-deliverable` | `skills/client-deliverable/` | Hand a report or proposal to a client at a private link. Gates to the recipient, never expires. |
 | `stacktree-agent-run-report` | `skills/agent-run-report/` | Publish what your agent just produced, shareable with anyone, refreshable in place. |
 | `stacktree-daily-brief` | `skills/daily-brief/` | A dated brief or digest at one stable link, refreshed in place each day (suits a scheduled loop). |
@@ -34,10 +35,10 @@ intent and falls back to the general skill for anything else.
 | `stacktree-custom-domain` | `skills/custom-domain/` | Buy a real domain over x402 (stabledomains.dev) and serve a Stacktree page on it, end to end. |
 | `stacktree-sideshow-handoff` | `skills/sideshow-to-stacktree/` | Publish a finished Sideshow surface as a standalone private link for someone outside the terminal. |
 
-All skills share the same `scripts/publish.sh` helper and the twelve Stacktree MCP
-tools (`publish_html`, `update_site`, `get_site`, `set_password`, `set_expiry`,
-`set_email_gate`, `set_agentation`, `list_sites`, `delete_site`, `link_wallet`,
-`list_feedback`, `resolve_feedback`). They differ in defaults and judgment: gating, expiry,
+Most skills use the `scripts/publish.sh` helper (each skill that calls it carries its
+own copy), and all of them use the Stacktree MCP server's 29 tools, such as
+`publish_html`, `update_site`, `set_password`, `set_client_feedback`, `list_feedback`
+and `resolve_feedback`. They differ in defaults and judgment: gating, expiry,
 public versus unlisted, and whether the page is refreshed in place. Each job skill
 mirrors the matching onboarding template in `apps/web/src/templates.ts`, so the
 published page lands in a shape the user already recognizes.
