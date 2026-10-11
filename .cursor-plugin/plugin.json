@@ -1,7 +1,7 @@
 {
   "name": "stacktree",
   "displayName": "Stacktree",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "Publish HTML to a private link that opens in any browser, with no account for the viewer. Use when you have built a report, dashboard, proposal, prototype or one-page site and need to put it in front of someone who is not at your screen. Links are unguessable by default, can be passcode-gated or restricted to a company email domain, expire on a schedule, update in place, and tell you when they are opened.",
   "author": {
     "name": "Stacktree",
