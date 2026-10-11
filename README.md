@@ -62,6 +62,19 @@ Free accounts get 3 pages for life, passcode gates on up to 3 of them, and
 expiry up to 7 days. Company-email gates, client spaces, custom domains and
 viewer analytics are on the paid tiers.
 
+## Install as a Cursor plugin
+
+The same repository is a Cursor plugin (`.cursor-plugin/plugin.json`): the
+skills plus the Stacktree MCP server, which signs in with OAuth the first time
+it publishes. Until it is listed in the Cursor Marketplace, install it locally:
+
+```bash
+git clone https://github.com/stevysmith/stacktree-skill ~/.cursor/plugins/local/stacktree
+```
+
+Then run **Developer: Reload Window** and check **Customize** for the Stacktree
+skills and MCP server.
+
 ## Install a single skill
 
 Browse the library and pick what you want at the prompt:
