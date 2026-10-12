@@ -31,7 +31,6 @@ The tools you will use most:
 | `set_client_feedback` | Let the people you send it to comment (words, images, video) and react, with no account. |
 | `list_feedback`      | Read their comments, each with what it is on and whether it is still on the page. |
 | `resolve_feedback`   | Close a comment with a short note the client sees.       |
-| `set_agentation`     | Older developer mark-up toolbar. Prefer `set_client_feedback`. |
 | `list_sites`         | List the sites in this account.                          |
 | `list_client_spaces` | List the client spaces pages are filed under.            |
 | `set_client`         | File an existing page under a client, or detach it.      |
@@ -48,7 +47,6 @@ The tools you will use most:
    - `password` — passcode gate, works on every plan (free covers its 3 pages)
    - `expires_in_hours` — number of hours, or `'never'`. A number over the plan ceiling is shortened to it; `'never'` on a plan that caps page lifetime is REFUSED (409 `expiry_clamped`), so pass `accept_clamp: true` to take the ceiling instead
    - `accept_clamp: true` — "the plan's shorter deadline is fine"; only needed alongside `'never'` on a capped plan
-   - `agentation: true` — the older developer mark-up toolbar; for client comments use `set_client_feedback` after publishing
    - `public_slug` — opt into `{slug}.stacktr.ee/` (otherwise unlisted)
    - `pii_check: 'off' | 'warn' | 'block'` — default `block` from MCP
    - `client` — file the page under a client space (see "Client spaces" below)
@@ -105,6 +103,7 @@ with `burn_after_read` is destroyed in the request that serves its one view, and
 a page taken down for abuse is never restorable. Both answer `restore_site` with
 a 404.
 
+
 ## Privacy
 
 Every URL is unlisted by default (`stacktr.ee/p/{22-char-token}/`) and not crawlable. Pass `public_slug` only when the user wants a discoverable URL.
@@ -125,7 +124,9 @@ Reaching for `update_site` on an existing page instead of publishing a new one i
 
 ## Making a page look better
 
-When the user asks to improve, polish, redesign, or "make beautiful" a published page, call `get_design_guide` FIRST and follow its workflow exactly. The short version: assess before restyling (a page that already has a deliberate design gets elevated in its own voice or left alone — never flattened to a house look), keep every fact/row/link intact, respect the CSP (no external fonts under strict CSP — use system stacks), then `update_site` in place so the shared link keeps working. Tell the user the direction you chose and that all content survived.
+When the user asks to improve, polish, redesign, or "make beautiful" a published page, call `get_design_guide` FIRST and follow its workflow exactly. The short version: assess before restyling (a page that already has a deliberate design gets elevated in its own voice or left alone, never flattened to a house look), keep every fact, row and link intact, and use web fonts where they earn their place (Google Fonts, Fontshare, Bunny Fonts and rsms.me load under the CSP; give a system fallback stack). Then `update_site` in place so the shared link keeps working. Tell the user the direction you chose and that all content survived.
+
+Building a new page for a client rather than polishing one? Follow the "Design the page" steps in `stacktree-client-deliverable`: plan a palette, type and one signature element from the sender's world, check it against the AI defaults, and build to the floor.
 
 ## Handing over a design canvas
 

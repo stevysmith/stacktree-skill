@@ -1,6 +1,6 @@
 ---
 name: stacktree-client-deliverable
-description: 'Hand a finished report or proposal to a client at a private link. Use when the user says "send this to the client", "share this with <company>", "this is for a customer", or is handing a polished deliverable to someone outside their team. Produces a page in the Client deliverable shape (a clean editorial "sheet" prepared-for-a-named-recipient), gates it to the recipient, removes the auto-expiry so the link stays live, and refuses to ship if the page leaks PII.'
+description: 'Hand a finished report or proposal to a client at a private link. Use when the user says "send this to the client", "share this with <company>", "this is for a customer", or is handing a polished deliverable to someone outside their team. Designs the page as a house document from the sender rather than a template, gates it to the recipient, removes the auto-expiry so the link stays live, and refuses to ship if the page leaks PII.'
 ---
 
 # stacktree-client-deliverable
@@ -22,18 +22,48 @@ For an agent-generated report meant for "anyone with the link", use
 `stacktree-agent-run-report`. For a dated digest refreshed in place, use
 `stacktree-daily-brief`. For a public status page, use `stacktree-status-dashboard`.
 
-## The page shape
+## Design the page
 
-Produce a single self-contained HTML document in the Client deliverable shape: a
-centered white `.sheet` with a `.topbar` (the studio/sender name on the left, a
-`.pill` reading "Private deliverable" on the right), then a `.pad` body with an
-`.eyebrow` "Prepared for <Client>", an `<h1>` title, a `.lede`, and a `.meta` row
-(prepared by, date, version). Use `.section` blocks for Overview, the one
-recommendation (in a `.callout`), an at-a-glance `<dl>`, and next steps
-(`<ol class="steps">`). Close with a `.foot`. The published page is what the client
-sees, so the craft is the point: keep it editorial, content-first, no broken
-assets. The canonical reference is the `client-deliverable` template in the
-Stacktree app (`apps/web/src/templates.ts`); match its structure and restraint.
+The client judges the sender by this page, so it should read as the sender's own
+house document, not a template. If the user hands you a page they already
+designed, keep their design and skip to the judgment below; these steps are for
+a page you build.
+
+1. **Plan before you write HTML.** Decide, in a few lines:
+   - **Palette:** 4 to 6 named hex colors drawn from the sender's or the client's
+     world (their brand, their trade, its materials), with one confident accent.
+   - **Type:** a display face used with restraint, a body face, and a mono or
+     tabular face for figures, paired on purpose.
+   - **Signature:** one element the page will be remembered by, which encodes
+     something true about the content. Scores set on a measuring ruler in an
+     audit, a month of traffic drawn as an elevation profile, fees set like a
+     menu in a proposal.
+2. **Check the plan against the defaults.** Change any choice that lands on one,
+   unless the user asked for it: cream paper with a serif and a terracotta accent;
+   near-black with one acid accent; broadsheet hairline columns; indigo or violet;
+   a centered white card with a colored pill; a colored left border on callouts.
+   Spend boldness in one place and keep everything around it quiet.
+3. **Build to the floor.** Body text 16px or more; headings at weight 500 to 600;
+   tabular figures on every column of numbers; spacing on an 8px rhythm; one
+   corner radius; uppercase only for small mono labels; no emoji as icons. It
+   reads at 390px wide with no sideways scroll, and prints cleanly
+   (`@media print`).
+4. **Keep the parts a deliverable needs,** in this order: who it is for and who it
+   is from, the date, the answer or recommendation, the evidence, then next steps
+   with owners and dates.
+5. **Look before you send.** If you can render the page, check it at desktop width
+   and at 390px. The first screen should sell the document in one look, and
+   nothing should overflow. Fix what you find.
+
+What loads on a published page: web fonts from Google Fonts, Fontshare, Bunny
+Fonts and rsms.me (always give a system fallback stack), libraries from cdnjs,
+jsDelivr and unpkg, and the page's own inline scripts. Put images inline as SVG
+or data: URIs.
+
+For the bar, open the live examples, each one a fictional studio's own document:
+<https://example-brand-audit.stacktr.ee>,
+<https://example-performance-report.stacktr.ee> and
+<https://example-proposal.stacktr.ee>. Borrow the craft, not the look.
 
 ## Required env
 
@@ -64,9 +94,8 @@ pay-to-provision path when there is genuinely no human and no key.
      password (`--password` or `set_password`). Generate a strong one, never reuse
      the user's own secrets, and surface it on its own line so it travels separately
      from the link.
-   The template's footer line ("This link is unguessable. Add a password if it
-   should be.") is the prompt: act on it, do not ship a bare link for a real
-   deliverable unless the user says "anyone with the link is fine".
+   Do not ship a bare link for a real deliverable unless the user says "anyone
+   with the link is fine".
 
 3. **It must not leak PII.** Keep the PII scan in `block` mode (the default). Client
    deliverables are exactly where an embedded API key, internal thread, or customer
@@ -84,8 +113,8 @@ pay-to-provision path when there is genuinely no human and no key.
 
 ## Steps
 
-1. Build the deliverable as a complete HTML document in the page shape above. If you
-   only have Markdown or a fragment, wrap and style it so it renders standalone.
+1. Build the deliverable as a complete HTML document, designed as above. If you only
+   have Markdown or a fragment, wrap and style it so it renders standalone.
 2. Decide the gate from what the user has. If unclear, ask one short question: "Do
    you have the client's email, or will you send them a password separately?"
 3. Publish with no expiry and the PII scan on, via the publish helper:

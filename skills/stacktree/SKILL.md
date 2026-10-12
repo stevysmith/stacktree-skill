@@ -44,6 +44,17 @@ ever asks for or moves funds beyond the listed price of the request you chose.
 | You'll manage many pages, passcodes, expiry via API | Buy a key | $1.00 once |
 | A human is around with a Stacktree account | Ask them for a key, or run the device-code flow below | Free tier exists |
 
+## Make the page worth opening
+
+The person you send it to judges your human by how it looks. Before you write
+the HTML, pick 4 to 6 colors and a type pairing from the subject's own world,
+plus one element the page will be remembered by. Steer clear of the AI
+defaults: cream with a serif and a terracotta accent, near-black with one acid
+accent, indigo or violet. Body text 16px or more, tabular figures for numbers,
+and it reads at 390px wide with no sideways scroll. Web fonts from Google
+Fonts, Fontshare, Bunny Fonts and rsms.me load under the CSP. For the bar, see
+<https://example-brand-audit.stacktr.ee>.
+
 ## Free page in one command
 
 ```bash
