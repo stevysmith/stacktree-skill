@@ -14,7 +14,7 @@ description: |
   - "publish", "host", "share this page", "make me a page", "send me a link"
   - "morning brief", "daily report", "dashboard", "status page", "field notes"
   - "update the page", "same link", "private link", "passcode", "x402"
-version: 1.0.1
+version: 1.0.3
 homepage: https://stacktr.ee
 metadata:
   openclaw:
@@ -85,6 +85,13 @@ That sends the claim link and the deadline now, and one reminder as the page
 runs out. The address is stored on the page, used for those two emails only,
 and cleared by the claim. Ask before you send someone's address anywhere,
 including here.
+
+If you already know who the page is for, name them in the publish itself and
+skip the second call: add `-F 'owner_email=<their address>'` (and
+`-F 'agent=<your name>'`, shown to them as the page's author). They get the
+keep link straight away, and one more email when someone else first opens the
+page. The response's `owner_email.sent` says whether it went. Same rule: ask
+first.
 
 At the deadline the page stops serving, but the claim link keeps working for
 the 30 days the content is held, and claiming an expired page brings it back
@@ -169,8 +176,9 @@ before you build a loop on it:
   that, and updates resume with the account's credential. An x402 page never
   expires, so its token works until someone claims it.
 - 30 updates per hour per IP, standard `RateLimit` headers on the response.
-- It replaces the content of that one page and nothing else: it cannot claim,
-  delete, change settings, or touch any other page.
+- It reaches that one page and nothing else: it replaces the content, says
+  whether anyone has opened it, and takes it down (sections below). It cannot
+  change settings or touch any other page.
 - **It is as sensitive as the page.** Whoever holds it can replace the content
   behind a link your human already sent their client. Store it with the page
   id; do not paste it into a shared transcript.
@@ -234,6 +242,38 @@ from an EVM wallet and would rather sign than store a token)
 One link that is always current. Your human bookmarks it once; you never send a
 new URL again. The same pattern serves a status dashboard, a research log, a
 client deliverable that goes through revisions.
+
+## Has anyone opened it?
+
+When your human asks whether the person they sent it to has looked, ask the
+page instead of guessing:
+
+```bash
+curl -sS https://api.stacktr.ee/sites/<id>/activity \
+  -H "Authorization: Claim <claim_token>"
+```
+
+The response carries `opened` (true or false), `first_opened_at`, `state`
+(`live`, `expired`, `removed`), open and total `comments`, `ai_reads` (a
+reader's own ChatGPT or Claude reading the page, or stopped at its passcode),
+and `summary`: one sentence built only from those fields, safe to say as it
+stands. On an unclaimed page it also carries `keep_url` and `next`, which says
+when to hand the keep link over. Once the page is claimed, send the account's
+key as `Authorization: Bearer` instead; names of who opened it come back only
+on plans that show viewers. An early open is often your human checking the
+link, so read `opened` as "someone opened it", not "the client read it".
+
+## Taking a page down
+
+```bash
+curl -sS -X DELETE https://api.stacktr.ee/sites/<id> \
+  -H "Authorization: Claim <claim_token>"
+```
+
+The link stops serving for everyone at once. A page deleted with its claim
+token cannot be restored or claimed afterwards, so do this only when your human
+asks. A claimed page is deleted with the account's key instead, and the
+response's `restorable_until` says how long the account can bring it back.
 
 ## Buying an API key ($1.00) — when it's actually right
 
