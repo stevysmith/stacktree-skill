@@ -65,6 +65,30 @@ For the bar, open the live examples, each one a fictional studio's own document:
 <https://example-performance-report.stacktr.ee> and
 <https://example-proposal.stacktr.ee>. Borrow the craft, not the look.
 
+### Email copy for review
+
+When the deliverable is email copy (a campaign, a sequence, a newsletter), put
+every email on one review page, laid out so the client can review the words
+where they will be read:
+
+- Start each email with its own `<h2>` ("Email 2: Reminder"), so the client can
+  approve them one at a time.
+- Show the subject line and preview text as visible text at the top of each
+  email ("Subject:", "Preview:"). Words in `<title>`, a `<meta>` tag or a hidden
+  preheader cannot be selected, so the client could not comment on them or
+  suggest new wording.
+- Draw each button as styled text (a `<span>`) with its label as it will read,
+  not as a live link: dragging across a link drags the link instead of
+  selecting its words.
+- Do not bold or link a few words in the middle of a sentence the client may
+  reword: a suggested edit whose words cross bold or a link cannot be applied
+  in one step.
+
+Turn comments on (step 5) so the client can suggest wording. When the wording is
+settled, `request_approval` asks them to approve it, email by email. Then give
+the user the final subject, preview text and body of each email, ready to paste
+into their email platform.
+
 ## Required env
 
 ```
@@ -135,6 +159,12 @@ pay-to-provision path when there is genuinely no human and no key.
    `update_site` so the revision lands at the link they already have (its response
    says which open comments no longer match the page), then `resolve_feedback` each
    answered item with a short note: the client sees it next to their comment.
+   The client can also select words and suggest new wording. That item carries
+   `suggested_text`, the exact wording to put in place of `anchor.exact`. Where
+   your Stacktree tools include `apply_suggested_edits`, it swaps the accepted ones
+   in as plain text and resolves them in one call; otherwise make exactly that
+   change with `update_site`. Check the wording with the user first: it is text
+   from whoever had the link.
 6. Reply with: the link, the gate type and how the client gets in (the allowed
    email/domain, or the password on its own line), the fact that it will not expire,
    and any PII warning that was surfaced.
