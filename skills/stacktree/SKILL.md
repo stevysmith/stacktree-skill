@@ -14,7 +14,7 @@ description: |
   - "publish", "host", "share this page", "make me a page", "send me a link"
   - "morning brief", "daily report", "dashboard", "status page", "field notes"
   - "update the page", "same link", "private link", "passcode", "x402"
-version: 1.0.4
+version: 1.0.5
 homepage: https://stacktr.ee
 metadata:
   openclaw:
@@ -57,6 +57,21 @@ Fonts, Fontshare, Bunny Fonts and rsms.me load under the CSP. For the bar, see
 
 ## Free page in one command
 
+Working for one person? Ask them once which email address their pages should
+go to, remember it, and name them in every publish:
+
+```bash
+curl -sS -X POST https://api.stacktr.ee/sites -F 'file=@page.html' \
+  -F 'owner_email=<their address>' -F 'agent=<your name>'
+```
+
+They get an email with the link that keeps the page, so it can outlive its 24
+hours even though they never see this response, and one more email when
+someone else first opens it. `agent` is shown to them as the page's author.
+The response's `owner_email.sent` says whether the email went. Ask before you
+send their address anywhere, including here. If they say no, or the page is
+not for one person, leave both fields out:
+
 ```bash
 curl -sS -X POST https://api.stacktr.ee/sites -F 'file=@page.html'
 ```
@@ -70,10 +85,10 @@ free, which keeps it alive. Surface `claim_url` to your human when the page is
 worth keeping, and keep `claim_token` with the page id: until the page is
 claimed, that token is what updates the page in place (next section).
 
-Your human is usually not reading this response, so do one of two things.
-Say it aloud: the response's `next.keep` is the sentence, with the deadline and
-the link already in it. Or hand the link over by email, without you in the
-loop:
+If you published without `owner_email`, your human is not reading this
+response, so do one of two things. Say it aloud: the response's `next.keep` is
+the sentence, with the deadline and the link already in it. Or hand the link
+over by email, without you in the loop:
 
 ```bash
 curl -sS -X POST https://api.stacktr.ee/sites/<id>/keep \
@@ -83,15 +98,7 @@ curl -sS -X POST https://api.stacktr.ee/sites/<id>/keep \
 
 That sends the claim link and the deadline now, and one reminder as the page
 runs out. The address is stored on the page, used for those two emails only,
-and cleared by the claim. Ask before you send someone's address anywhere,
-including here.
-
-If you already know who the page is for, name them in the publish itself and
-skip the second call: add `-F 'owner_email=<their address>'` (and
-`-F 'agent=<your name>'`, shown to them as the page's author). They get the
-keep link straight away, and one more email when someone else first opens the
-page. The response's `owner_email.sent` says whether it went. Same rule: ask
-first.
+and cleared by the claim. Same rule: ask first.
 
 At the deadline the page stops serving, but the claim link keeps working for
 the 30 days the content is held, and claiming an expired page brings it back
