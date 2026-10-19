@@ -83,8 +83,20 @@ where they will be read:
 - Do not bold or link a few words in the middle of a sentence the client may
   reword: a suggested edit whose words cross bold or a link cannot be applied
   in one step.
+- Write merge fields and placeholders as they will be sent (`{first_name}`,
+  `[brand phone]`). The suggestion box warns a reviewer whose wording leaves
+  one out.
+- Wrap words that must not change in `<span data-stacktree-keep>` (a phone
+  number, a legal line), and put `data-stacktree-max="160"` on a text message
+  or any copy with a character limit. The box warns when an edit changes kept
+  words and counts characters as the reviewer types.
 
-Turn comments on (step 5) so the client can suggest wording. When the wording is
+Turn comments on (step 5) so the client can suggest wording, a new paragraph
+after one, or removing one. When more than one person reviews, make each of them
+their own named link (`create_share_link` with their name) so every comment
+arrives with a name, and tell the user about the page screen's "Let reviewers
+see each other's comments" switch so the reviewers can build on each other's
+changes. When the wording is
 settled, `request_approval` asks them to approve it, email by email. Then give
 the user the final subject, preview text and body of each email, ready to paste
 into their email platform.

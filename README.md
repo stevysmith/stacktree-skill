@@ -36,7 +36,7 @@ intent and falls back to the general skill for anything else.
 | `stacktree-sideshow-handoff` | `skills/sideshow-to-stacktree/` | Publish a finished Sideshow surface as a standalone private link for someone outside the terminal. |
 
 Most skills use the `scripts/publish.sh` helper (each skill that calls it carries its
-own copy), and all of them use the Stacktree MCP server's 29 tools, such as
+own copy), and all of them use the Stacktree MCP server's 41 tools, such as
 `publish_html`, `update_site`, `set_password`, `set_client_feedback`, `list_feedback`
 and `resolve_feedback`. They differ in defaults and judgment: gating, expiry,
 public versus unlisted, and whether the page is refreshed in place. Each job skill
