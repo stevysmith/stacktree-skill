@@ -62,6 +62,26 @@ Free accounts get 3 pages for life, passcode gates on up to 3 of them, and
 expiry up to 7 days. Company-email gates, client spaces, custom domains and
 viewer analytics are on the paid tiers.
 
+## Install in Hermes Agent
+
+`agent-plugin/` holds the same MCP server and skills in the portable Agent
+Plugins layout. Until Stacktree is in Hermes's plugin catalog, add the skill
+from stacktr.ee:
+
+```bash
+hermes skills install well-known:https://stacktr.ee/.well-known/skills/stacktree
+```
+
+and the MCP server in `~/.hermes/config.yaml`, then sign in with
+`hermes mcp login stacktree`:
+
+```yaml
+mcp_servers:
+  stacktree:
+    url: https://api.stacktr.ee/mcp
+    auth: oauth
+```
+
 ## Install as a Cursor plugin
 
 The same repository is a Cursor plugin (`.cursor-plugin/plugin.json`): the

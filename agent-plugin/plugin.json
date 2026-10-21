@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "stacktree",
+  "version": "1.2.0",
+  "description": "Publish the pages you build to a private link that opens in any browser, with no account for the viewer. Links are unguessable by default, can carry a passcode or be limited to a company email domain, expire on a schedule, and update in place so a link you have already sent never goes stale.",
+  "author": {
+    "name": "Stacktree",
+    "url": "https://stacktr.ee"
+  },
+  "homepage": "https://stacktr.ee",
+  "repository": "https://github.com/stevysmith/stacktree-skill",
+  "license": "MIT",
+  "keywords": ["html", "publish", "hosting", "share", "link", "client-delivery", "report", "dashboard", "mcp"]
+}
