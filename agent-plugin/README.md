@@ -26,8 +26,7 @@ pages since its last check.
   at the link it gets back. Page titles, open counts and comments from that
   account come back into the session when the agent asks for them.
 - Hermes keeps the OAuth token from `hermes mcp login stacktree`; the plugin
-  never reads or stores a credential. Removing Stacktree from the connected apps
-  in your Stacktree account ends that access.
+  never reads or stores a credential.
 
 Links are unguessable and private by default. Privacy policy:
 https://stacktr.ee/privacy. Version 1.2.0.
