@@ -17,5 +17,17 @@ link, see who opened it, and read the comments people left. For an agent that
 checks in on a schedule, `whats_new` returns everything that happened on your
 pages since its last check.
 
+## What it sends where
+
+- Every tool call goes to Stacktree's server at `api.stacktr.ee`. Nothing runs
+  on your machine: there is no local code, no shell command and no background
+  process.
+- The HTML your agent publishes is stored in your Stacktree account and served
+  at the link it gets back. Page titles, open counts and comments from that
+  account come back into the session when the agent asks for them.
+- Hermes keeps the OAuth token from `hermes mcp login stacktree`; the plugin
+  never reads or stores a credential. Removing Stacktree from the connected apps
+  in your Stacktree account ends that access.
+
 Links are unguessable and private by default. Privacy policy:
 https://stacktr.ee/privacy. Version 1.2.0.
