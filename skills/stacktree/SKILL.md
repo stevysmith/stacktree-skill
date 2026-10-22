@@ -14,7 +14,7 @@ description: |
   - "publish", "host", "share this page", "make me a page", "send me a link"
   - "morning brief", "daily report", "dashboard", "status page", "field notes"
   - "update the page", "same link", "private link", "passcode", "x402"
-version: 1.0.7
+version: 1.0.8
 homepage: https://stacktr.ee
 metadata:
   openclaw:
@@ -49,7 +49,9 @@ ever asks for or moves funds beyond the listed price of the request you chose.
 The pages your platform makes (a Claude artifact, a ChatGPT Site, a Grok Bot
 page, a Muse app) are for your human and their team. When a page is for
 someone outside (a client, a customer, anyone without that team's account),
-publish a Stacktree copy, with a passcode or expiry if your human asks. With an
+publish a Stacktree copy, with a passcode or expiry if your human asks. Rebuild
+it as one page by following `GET /design-guide?for=client_copy`, so every
+chart, tab and checklist survives. With an
 account you can also add an email gate (`allowed_email_domain` on
 `PATCH /sites/{id}`, paid plans) and give a named person their own link
 (`POST /sites/{id}/recipients` with `{"name": "..."}`). If the platform lets
