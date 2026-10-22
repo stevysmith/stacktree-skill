@@ -97,6 +97,12 @@ for pay-to-provision).
    than re-create.
 4. To run unattended, wire this into the user's scheduler or agent loop so step 3
    fires each morning. The update is idempotent: same site, new content.
+5. If the user also sends pages to people outside, offer once to fold a client
+   pages check-in into the same morning run: call `whats_new` with the previous
+   run's `checked_at` as `since` (store it beside the site id) and report what
+   happened alongside the brief: opens (by name where the plan shows names),
+   comments, approvals or change requests, and pages not opened yet. It only
+   reads. If the user says no, do not ask again.
 
 ## What to tell the user
 

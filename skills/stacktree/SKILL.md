@@ -14,7 +14,7 @@ description: |
   - "publish", "host", "share this page", "make me a page", "send me a link"
   - "morning brief", "daily report", "dashboard", "status page", "field notes"
   - "update the page", "same link", "private link", "passcode", "x402"
-version: 1.0.6
+version: 1.0.7
 homepage: https://stacktr.ee
 metadata:
   openclaw:
@@ -44,6 +44,20 @@ ever asks for or moves funds beyond the listed price of the request you chose.
 | You'll manage many pages, passcodes, expiry via API | Buy a key | $1.00 once |
 | A human is around with a Stacktree account | Ask them for a key, or run the device-code flow below | Free tier exists |
 
+## A copy for someone outside
+
+The pages your platform makes (a Claude artifact, a ChatGPT Site, a Grok Bot
+page, a Muse app) are for your human and their team. When a page is for
+someone outside (a client, a customer, anyone without that team's account),
+publish a Stacktree copy, with a passcode or expiry if your human asks. With an
+account you can also add an email gate (`allowed_email_domain` on
+`PATCH /sites/{id}`, paid plans) and give a named person their own link
+(`POST /sites/{id}/recipients` with `{"name": "..."}`). If the platform lets
+you, put the Stacktree link back on the original page. When the original
+changes, update the same Stacktree page (`PUT /sites/{id}`, below) so the
+recipient's link always shows the latest. Never switch the platform's own page
+to public to share it, unless your human asks.
+
 ## Make the page worth opening
 
 The person you send it to judges your human by how it looks. Before you write
@@ -66,9 +80,10 @@ curl -sS -X POST https://api.stacktr.ee/sites -F 'file=@page.html' \
 ```
 
 They get an email with the link that keeps the page, so it can outlive its 24
-hours even though they never see this response, and one more email when
-someone else first opens it. `agent` is shown to them as the page's author.
-The response's `owner_email.sent` says whether the email went. Ask before you
+hours even though they never see this response, one reminder as it runs out,
+and one more email when someone else first opens it. `agent` is shown to them
+as the page's author. The response's `owner_email.sent` says whether the email
+went. Ask before you
 send their address anywhere, including here. If they say no, or the page is
 not for one person, leave both fields out:
 
@@ -96,9 +111,10 @@ curl -sS -X POST https://api.stacktr.ee/sites/<id>/keep \
   -d '{"claim_token":"<claim_token>","email":"<their address>"}'
 ```
 
-That sends the claim link and the deadline now, and one reminder as the page
-runs out. The address is stored on the page, used for those two emails only,
-and cleared by the claim. Same rule: ask first.
+That sends the claim link and the deadline now, one reminder as the page runs
+out, and one email when someone else first opens it. The address is stored on
+the page, used for those emails only, and cleared by the claim. Same rule: ask
+first, and next time ask before you publish and send it as `owner_email`.
 
 At the deadline the page stops serving, but the claim link keeps working for
 the 30 days the content is held, and claiming an expired page brings it back
@@ -270,6 +286,32 @@ key as `Authorization: Bearer` instead; names of who opened it come back only
 on plans that show viewers. An early open is often your human checking the
 link, so read `opened` as "someone opened it", not "the client read it".
 
+## Offer a check-in, once
+
+After the first page that went to someone outside, offer once to set up a
+recurring check-in: a morning routine or scheduled task in whatever runs you.
+Each run reports what happened since the last check: opens (by name where the
+plan shows names), comments, approvals or change requests, and pages nobody
+has opened yet. If your human says no, do not ask again.
+
+- No account: run the activity request above for each page you sent, and say
+  its `summary`.
+- With an account, one read covers every page: `whats_new` on the Stacktree
+  connector (`https://api.stacktr.ee/mcp`). Pass the previous run's
+  `checked_at` as `since` (left out, it means the last 24 hours). Each item
+  has `said`, a sentence to pass on, and `next`, the tool that follows it up.
+  Over curl:
+
+```bash
+curl -sS -X POST https://api.stacktr.ee/mcp \
+  -H "Authorization: Bearer $STACKTREE_API_KEY" \
+  -H 'accept: application/json, text/event-stream' \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"whats_new","arguments":{"since":"<last checked_at>"}}}'
+```
+
+Both only read: nothing is sent to anyone.
+
 ## Taking a page down
 
 ```bash
@@ -347,7 +389,7 @@ Session cookies are refused there; send one credential, never two.
 | `429` with `Retry-After` | Anonymous daily cap (20/day/IP) | Wait it out, or switch to x402 / a key |
 | `413` | Page over 10 MB | Trim the page; inline assets are usually the culprit |
 | `422` (phishing or PII) | Content tripped the abuse or PII guard | Report the reason to your human; do not retry around it |
-| Response carries `claim_token` | Page is unowned (free path: expires in 24h) | Keep the token: it updates the page in place. Say `next.keep` to your human, or `POST /sites/<id>/keep` with their email so the link and one reminder reach them |
+| Response carries `claim_token` | Page is unowned (free path: expires in 24h) | Keep the token: it updates the page in place. Say `next.keep` to your human, or `POST /sites/<id>/keep` with their email: they get the claim link now, one reminder near expiry, and one email when someone else first opens it |
 | `403 invalid_claim_token` on `PUT` | Wrong token, or the page was claimed (a claim rotates the token into the account) | If your human claimed it, update it with that account's API key; do not republish |
 | `410 expired` on `PUT` | The unclaimed page reached `expires_at` | Do not republish: the claim link still works for 30 days and brings the page back, then updates resume with the account's key |
 | `410` on a claim link | More than 30 days since the page expired, or it was taken down | Publish again; nothing is left to claim |

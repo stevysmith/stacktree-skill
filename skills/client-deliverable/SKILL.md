@@ -17,6 +17,12 @@ stay reachable, and only open for the intended recipient.
 - The page is a deliverable, not a scratch draft: a proposal, audit, report, or
   pitch.
 - The recipient is outside the user's own org and will not have a Stacktree account.
+- The page already lives on the user's platform (a Claude artifact, a ChatGPT
+  Site, a Grok Bot page, a Muse app). Those are for the user's team: publish a
+  Stacktree copy for the client, put its link back on the original if the
+  platform allows, and when the original changes, `update_site` the same
+  Stacktree page so the client's link shows the latest. Never switch the
+  original to public to share it unless the user asks.
 
 For an agent-generated report meant for "anyone with the link", use
 `stacktree-agent-run-report`. For a dated digest refreshed in place, use
@@ -162,6 +168,8 @@ pay-to-provision path when there is genuinely no human and no key.
 4. Apply the gate:
    - Email gate: `set_email_gate` on the returned id with the client's email or
      `@their-domain.com`.
+   - Named person: `whos_it_for` with their name returns their own link, which
+     keeps the gate in front of the page. Hand over that link, not the bare url.
    - Password: pass `--password <generated>` in step 3, or call `set_password`
      after. Prefer generating the password over asking the user to invent one.
 5. For a draft the client should review, call `set_client_feedback` with
@@ -183,6 +191,12 @@ pay-to-provision path when there is genuinely no human and no key.
    If the page has a page video (the owner adds one from the dashboard), the link
    ending `#watch` opens straight into it, and the dashboard gives a picture of it
    to paste into the email above that link.
+7. If this is the first page the user has sent outside, offer once to set up a
+   recurring check-in (a morning routine or scheduled task in this agent). Each
+   run calls `whats_new` with the previous run's `checked_at` as `since` and
+   reports what happened since: opens (by name where the plan shows names),
+   comments, approvals or change requests, and pages not opened yet. It only
+   reads. If the user says no, do not ask again.
 
 ## What to tell the user
 
