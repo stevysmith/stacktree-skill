@@ -52,7 +52,8 @@ The tools you will use most:
    - `public_slug` — opt into `{slug}.stacktr.ee/` (otherwise unlisted)
    - `pii_check: 'off' | 'warn' | 'block'` — default `block` from MCP
    - `client` — file the page under a client space (see "Client spaces" below)
-3. The tool returns a JSON object including `url` and `expires_at`. Surface the URL inline in your reply, plus when the link expires and any PII warnings.
+   - `recipient`: the person the page is for, when the user has named them ("send it to Megan Hale" means `"Megan Hale"`). The response then carries `recipient.link`, a link with their name on it, so the user hears when that person opens it
+3. The tool returns a JSON object including `url` and `expires_at`. Surface the URL inline in your reply, plus when the link expires and any PII warnings. If you passed `recipient`, hand over `recipient.link` instead of the bare url. If the user has not said who the page is for, hand over the url, ask who it is for, and call `whos_it_for` with the name they give.
 4. If the user iterates on the same artifact later in the session, call **`update_site`** instead of `publish_html` — pass the previous `id` or `unlisted_token` so the URL stays stable across revisions.
 5. After the first page that went to someone outside, offer once to set up a recurring check-in: a morning routine or scheduled task in whatever agent this is. Each run calls `whats_new` (read-only; pass the previous run's `checked_at` as `since`) and reports what happened since the last check: opens (by name where the plan shows names), comments, approvals or change requests, and pages not opened yet. Each item has `said`, a sentence to pass on, and `next`, the tool that follows it up. If the user says no, do not offer again.
    `whats_new` is on the Stacktree connector (`https://api.stacktr.ee/mcp`). If it is not in your tool list (the `npx stacktree-mcp` server does not carry it), call `get_activity` on each page and `unopened_pages` instead.
@@ -60,7 +61,10 @@ The tools you will use most:
 ## Examples
 
 User: "Publish this dashboard."
-→ Call `publish_html` with the HTML, reply with the returned URL inline.
+→ Call `publish_html` with the HTML, reply with the returned URL inline, and ask who it is for.
+
+User: "Send this to Megan at Acme."
+→ Call `publish_html` with `recipient: "Megan"` and `client: "Acme"`, then reply with `recipient.link`.
 
 User: "Update the same one — gate it to @yourco.com."
 → Call `update_site` with the existing slug and new HTML, then `set_email_gate` with the domain.
