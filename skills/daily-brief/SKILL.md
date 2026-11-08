@@ -35,26 +35,19 @@ and refreshed at the same link. The date and the update-time must change on ever
 run, the URL must not. Canonical reference: the `daily-brief` template in
 `apps/web/src/templates.ts`.
 
-## Required env
+## Account
 
-```
-STACKTREE_API_KEY=stk_live_...   # generate at https://app.stacktr.ee/api-keys
-```
-
-This skill is authed-only by nature: refresh-in-place requires an owned site you can
-update. Anonymous uploads cannot be updated and expire in 24h, so they cannot back a
-daily brief. If no key is set, ask for one (or see the root `stacktree-publish` skill
-for pay-to-provision).
+Refresh-in-place needs a site the user owns. The Stacktree tools in this plugin
+publish under the user's own Stacktree account, so every page they make can be
+updated later. If the tools are not connected yet, ask the user to connect
+Stacktree.
 
 ## The judgment this skill encodes
 
 1. **One site, updated in place. This is the whole point.** On the first run,
    publish once and record the returned `id` (and slug, if any). On every later run,
    do not publish a new site, update the existing one:
-   ```bash
-   echo "$BRIEF_HTML" | bash scripts/publish.sh --update <id-or-slug> --expires-never
-   ```
-   or call `update_site` with the saved id. The user's bookmark, and any link they
+   call `update_site` with the saved id. The user's bookmark, and any link they
    shared, must keep resolving. Minting a new URL each day is the failure mode this
    skill exists to prevent.
 
@@ -82,18 +75,13 @@ for pay-to-provision).
 
 1. First run: build the brief as a complete HTML document in the page shape above,
    with today's date and update-time. Publish once:
-   ```bash
-   echo "$BRIEF_HTML" | bash scripts/publish.sh --expires-never
-   ```
+   `publish_html` with `expires_in_hours: 'never'`.
    Record the returned `id` and `url`. Gate it if the content is private.
 2. Hand the user the URL to bookmark, and note that it will refresh at this same
    address.
 3. Every later run (manual or scheduled): regenerate the brief with the new date and
    content, then update in place:
-   ```bash
-   echo "$BRIEF_HTML" | bash scripts/publish.sh --update <id-or-slug> --expires-never
-   ```
-   or `update_site`. Confirm the id resolved; if not, `list_sites` and match rather
+   `update_site` with the saved id. Confirm the id resolved; if not, `list_sites` and match rather
    than re-create.
 4. To run unattended, wire this into the user's scheduler or agent loop so step 3
    fires each morning. The update is idempotent: same site, new content.

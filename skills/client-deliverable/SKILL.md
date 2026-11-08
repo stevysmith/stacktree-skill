@@ -107,17 +107,12 @@ settled, `request_approval` asks them to approve it, email by email. Then give
 the user the final subject, preview text and body of each email, ready to paste
 into their email platform.
 
-## Required env
+## Account
 
-```
-STACKTREE_API_KEY=stk_live_...   # generate at https://app.stacktr.ee/api-keys
-```
-
-A client deliverable should publish under the user's own account so they keep
-ownership and can revoke it later. If no key is set, ask for one rather than
-falling back to an anonymous upload (anonymous uploads expire in 24h, which is
-wrong for a deliverable). See the root `stacktree-publish` skill for the
-pay-to-provision path when there is genuinely no human and no key.
+The Stacktree tools in this plugin publish under the user's own Stacktree
+account, so they keep ownership and can revoke the link later. If the tools are
+not connected yet, ask the user to connect Stacktree rather than publishing any
+other way.
 
 ## The judgment this skill encodes
 
@@ -148,10 +143,10 @@ pay-to-provision path when there is genuinely no human and no key.
 
 4. **The URL can read as professional.** A raw `stacktr.ee/p/<token>/` link is fine
    and private, but for an external deliverable a custom domain (e.g.
-   `proposals.theiragency.com`) reads better. Custom domains are a paid Pro unlock,
-   not a publish flag, and there is no MCP tool for the mapping, so point the user to
-   <https://stacktr.ee/x402> or the dashboard to enable it. Do not block the hand-off
-   on it; ship the private link now and offer the domain as a follow-up.
+   `proposals.theiragency.com`) reads better. A custom domain is set up in the
+   Stacktree dashboard, not with a tool, and depends on the account's plan. Do not
+   block the hand-off on it; ship the private link now and mention the domain as a
+   follow-up.
 
 ## Steps
 
@@ -159,19 +154,16 @@ pay-to-provision path when there is genuinely no human and no key.
    have Markdown or a fragment, wrap and style it so it renders standalone.
 2. Decide the gate from what the user has. If unclear, ask one short question: "Do
    you have the client's email, or will you send them a password separately?"
-3. Publish with no expiry and the PII scan on, via the publish helper:
-   ```bash
-   echo "$DELIVERABLE_HTML" | bash scripts/publish.sh --expires-never
-   ```
-   Equivalent MCP path: `publish_html` with expiry set to never. Capture the `id`
-   and `url`.
+3. Publish with `publish_html`, `expires_in_hours: 'never'`, and the PII scan on
+   (the default). Capture the `id` and `url`.
 4. Apply the gate:
    - Email gate: `set_email_gate` on the returned id with the client's email or
      `@their-domain.com`.
    - Named person: `whos_it_for` with their name returns their own link, which
      keeps the gate in front of the page. Hand over that link, not the bare url.
-   - Password: pass `--password <generated>` in step 3, or call `set_password`
-     after. Prefer generating the password over asking the user to invent one.
+   - Password: pass `password` to `publish_html` in step 3, or call
+     `set_password` after. Prefer generating the password over asking the user
+     to invent one.
 5. For a draft the client should review, call `set_client_feedback` with
    `comments: true` (skip it for a final, signed deliverable). The client selects
    words or clicks an image, chart or video and comments, with no account. Own the
@@ -201,5 +193,5 @@ pay-to-provision path when there is genuinely no human and no key.
 ## What to tell the user
 
 State plainly who can open it (the gate), that the link will stay live, and what the
-PII scan caught if anything. If they wanted a custom domain, note it is a one-time
-Pro unlock and offer to walk them through it rather than holding up the hand-off.
+PII scan caught if anything. If they wanted a custom domain, say it is set up in
+the Stacktree dashboard rather than holding up the hand-off.

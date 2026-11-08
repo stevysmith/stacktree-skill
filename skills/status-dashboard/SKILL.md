@@ -36,17 +36,13 @@ and a per-service `.status ok|warn`), and a Recent incidents note. Close with a
 overall pill and the updated-at must reflect real current state on each run.
 Canonical reference: the `status-dashboard` template in `apps/web/src/templates.ts`.
 
-## Required env
+## Account
 
-```
-STACKTREE_API_KEY=stk_live_...   # generate at https://app.stacktr.ee/api-keys
-```
-
-Authed-only: a public slug and refresh-in-place both require an owned site. If no key
-is set, ask for one (or see the root `stacktree-publish` skill for pay-to-provision).
-Note that a public custom slug may be a Pro feature; if the slug is rejected, fall
-back to the unlisted URL and point the user to the unlock at <https://stacktr.ee/x402>
-or the dashboard.
+A public slug and refresh-in-place both need a site the user owns. The Stacktree
+tools in this plugin publish under the user's own Stacktree account. If the tools
+are not connected yet, ask the user to connect Stacktree. A public slug may not be
+on the account's plan; if the slug is rejected, fall back to the unlisted URL and
+tell the user a public address is not available on their current plan.
 
 ## The judgment this skill encodes
 
@@ -71,10 +67,7 @@ or the dashboard.
 4. **Refresh in place, never a new URL.** The page's whole value is one stable
    address that always shows current state. On the first run, publish with the slug
    and record the `id`. On every later run, update the same site:
-   ```bash
-   echo "$STATUS_HTML" | bash scripts/publish.sh --update <id-or-slug> --expires-never
-   ```
-   or call `update_site`. For a live page this update typically runs on a tight loop
+   call `update_site` with the saved id. For a live page this update typically runs on a tight loop
    or scheduler (the template copy says "refreshed every minute"); persist the
    `id`/slug so the loop always targets the same page, and recover it with
    `list_sites` if lost rather than re-creating.
@@ -86,19 +79,13 @@ or the dashboard.
 
 1. First run: build the status page as a complete HTML document in the page shape
    above, reflecting real current health. Publish with the public slug, no expiry:
-   ```bash
-   echo "$STATUS_HTML" | bash scripts/publish.sh --public-slug status --expires-never
-   ```
-   Equivalent MCP path: `publish_html` with the public slug set. Record the `id` and
-   the public `url`. If the slug is rejected as a paid feature, fall back to the
-   unlisted URL and tell the user how to unlock the slug.
+   `publish_html` with `public_slug: 'status'` and `expires_in_hours: 'never'`.
+   Record the `id` and the public `url`. If the slug is rejected because the plan
+   does not include it, fall back to the unlisted URL and tell the user.
 2. Hand the user the public URL to link from their site/footer.
 3. Every later run (usually scheduled, often per-minute): regenerate the page with
    current state and the new updated-at, then update in place:
-   ```bash
-   echo "$STATUS_HTML" | bash scripts/publish.sh --update <id-or-slug> --expires-never
-   ```
-   or `update_site`. Keep the same site id.
+   `update_site` with the saved id. Keep the same site id.
 4. To run live, wire step 3 into the user's scheduler/agent loop at the cadence they
    want.
 
@@ -107,5 +94,4 @@ or the dashboard.
 Give them the public URL, confirm it is open to anyone (no login) and stays at one
 address as it refreshes, and state the refresh cadence if you set one up. Remind them
 that because it is public, only world-safe data should go on it, and confirm the PII
-scan stayed strict. If the public slug needed a Pro unlock, say so and offer to walk
-them through it.
+scan stayed strict. If the public slug was not available on their plan, say so.

@@ -41,17 +41,11 @@ place at the same URL. Charts must be self-contained (inline SVG, as the templat
 does, or a pinned CDN script, never a local file path that 404s). The canonical
 reference is the `agent-run-report` template in `apps/web/src/templates.ts`.
 
-## Required env
+## Account
 
-```
-STACKTREE_API_KEY=stk_live_...   # generate at https://app.stacktr.ee/api-keys
-```
-
-An authed publish keeps the report under the user's account so it is listable
-(`list_sites`), editable, and refreshable later. Without a key you can still publish
-anonymously, but it expires in 24h, fine for a glanceable one-off, wrong for
-anything the user wants to keep or refresh. See the root `stacktree-publish` skill
-for the pay-to-provision path.
+The Stacktree tools in this plugin publish under the user's own Stacktree
+account, so the report is listable (`list_sites`), editable and refreshable
+later. If the tools are not connected yet, ask the user to connect Stacktree.
 
 ## The judgment this skill encodes
 
@@ -89,17 +83,10 @@ for the pay-to-provision path.
 2. Decide lifecycle: snapshot (keep the 7-day default) vs keeper
    (`--expires-never`). If the user did not say, default to snapshot and mention how
    to keep it.
-3. Publish via the publish helper:
-   ```bash
-   echo "$REPORT_HTML" | bash scripts/publish.sh
-   ```
-   Add `--expires-never` for a keeper. Equivalent MCP path: `publish_html`. Capture
-   the `id` and `url`.
-4. To refresh on a later run, update in place:
-   ```bash
-   echo "$REPORT_HTML_V2" | bash scripts/publish.sh --update <id-or-slug>
-   ```
-   or call `update_site`.
+3. Publish with `publish_html`. Pass `expires_in_hours: 'never'` for a keeper.
+   Capture the `id` and `url`.
+4. To refresh on a later run, call `update_site` with the saved `id`, so the
+   report updates in place at the same URL.
 5. Reply with the URL, when it expires (or that it is permanent), the fact that
    anyone with the link can open it with no account, and any PII warning before the
    user forwards it.

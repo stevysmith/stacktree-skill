@@ -43,4 +43,4 @@ pages since its last check.
   stores a credential.
 
 Links are unguessable and private by default. Privacy policy:
-https://stacktr.ee/privacy. Version 1.2.0.
+https://stacktr.ee/privacy. Version 1.3.2.

@@ -62,16 +62,10 @@ refreshes on a loop (use `stacktree-status-dashboard`).
 2. Compose a single self-contained HTML document per the judgment above. Match
    the surface's reading order; a short header naming the work and the date
    helps the recipient.
-3. Publish to Stacktree:
-   ```bash
-   echo "$HTML" | bash scripts/publish.sh          # unlisted, 7-day default
-   ```
-   or the `publish_html` MCP tool. Capture `id` and `url`. Add gates if the
-   recipient warrants them.
-4. On later iterations of the same surface, republish in place:
-   ```bash
-   echo "$HTML_V2" | bash scripts/publish.sh --update <id-or-slug>
-   ```
+3. Publish it with the `publish_html` tool. Capture `id` and `url`. Add gates
+   if the recipient warrants them.
+4. On later iterations of the same surface, republish in place with
+   `update_site` and the same `id`, so the link you sent shows the new version.
 5. Reply with the URL, the expiry, and the note that it opens in any browser
    with no account and no viewer — and that the sideshow session stays local
    and unaffected.
